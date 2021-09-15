@@ -19,9 +19,6 @@
 #ifndef GBJ_APPTHERMO_DS_H
 #define GBJ_APPTHERMO_DS_H
 
-#undef SERIAL_PREFIX
-#define SERIAL_PREFIX "gbj_appthermo_ds"
-
 #if defined(__AVR__)
   #include <Arduino.h>
   #include <inttypes.h>
@@ -34,6 +31,9 @@
 #include "gbj_ds18b20.h"
 #include "gbj_serial_debug.h"
 #include "gbj_timer.h"
+
+#undef SERIAL_PREFIX
+#define SERIAL_PREFIX "gbj_appthermo_ds"
 
 class gbj_appthermo_ds : gbj_appbase
 {
@@ -63,7 +63,7 @@ public:
   inline gbj_appthermo_ds(byte pinBus, byte resolution)
   {
     _sensor = new gbj_ds18b20(pinBus);
-    _timer = new gbj_timer(5000);
+    _timer = new gbj_timer(Timing::PERIOD_MEASURE);
     _resolution = constrain(resolution, 9, 12);
   }
 
@@ -104,6 +104,10 @@ public:
   inline bool isMeasured() { return isSuccess(); }
 
 private:
+  enum Timing : unsigned int
+  {
+    PERIOD_MEASURE = 1000,
+  };
   gbj_timer *_timer;
   gbj_ds18b20 *_sensor;
   byte _resolution;
