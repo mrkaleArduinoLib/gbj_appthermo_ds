@@ -101,6 +101,8 @@ public:
   inline unsigned long getPeriod() { return _timer->getPeriod(); }
   inline float getTemperature() { return _temperature; }
   inline byte getSensors() { return _sensors; }
+  inline byte getResolutionBits() { return _sensor->getResolutionBits(); }
+  inline float getResolutionTemp() { return _sensor->getResolutionTemp(); }
   inline bool isMeasured() { return isSuccess(); }
 
 private:
