@@ -1,6 +1,7 @@
 <a id="library"></a>
+
 # gbj\_appthermo_ds
-This is an application library, wich is used usually as a project library for particular PlatformIO project. The library utilizes all active temperature sensors `DS18B20` on one-wire bus for measuring the ambient temperature.
+This is an application library, which is used usually as a project library for particular PlatformIO project. The library utilizes all active temperature sensors `DS18B20` on one-wire bus for measuring the ambient temperature.
 
 - Library specifies (inherits from) the system `gbj_appbase` library.
 - It utilizes error handling from the parent class.
@@ -8,15 +9,13 @@ This is an application library, wich is used usually as a project library for pa
 
 
 <a id="dependency"></a>
+
 ## Dependency
 
 - **gbj\_appbase**: Parent library for all application libraries loaded from the file `gbj_appbase.h`.
 - **gbj\_timer**: Library for executing internal timer within an instance object loaded from the file `gbj_timer.h`.
 - **gbj\_serial\_debug**: Auxilliary library for debug serial output loaded from the file `gbj_serial_debug.h`. It enables to exclude serial outputs from final compilation.
 - **gbj\_ds18b20**: Library for processing temperature sensors `DS18B20` loaded from the file `gbj_ds18b20.h`.
-
-#### Particle platform
-- **Particle.h**: Includes alternative (C++) data type definitions.
 
 #### Arduino platform
 - **Arduino.h**: Main include file for the Arduino SDK.
@@ -25,8 +24,12 @@ This is an application library, wich is used usually as a project library for pa
 #### Espressif platform
 - **Arduino.h**: Main include file for the Arduino platform.
 
+#### Particle platform
+- **Particle.h**: Includes alternative (C++) data type definitions.
+
 
 <a id="constants"></a>
+
 ## Constants
 
 - **gbj\_appthermo_ds::VERSION**: Name and semantic version of the library.
@@ -35,18 +38,20 @@ Other constants and enumerations are inherited from the parent library.
 
 
 <a id="interface"></a>
+
 ## Interface
 
 - [gbj_appthermo_ds()](#gbj_appthermo_ds)
 - [run()](#run)
-- [setPeriod()](#setPeriod)
-- [getPeriod()](#getPeriod)
+- [setPeriod()](#period)
+- [getPeriod()](#period)
 - [getSensors()](#getSensors)
 - [getTemperature()](#getTemperature)
 - [isMeasured()](#isMeasured)
 
 
 <a id="gbj_appthermo_ds"></a>
+
 ## gbj_appthermo_ds()
 
 #### Description
@@ -76,81 +81,29 @@ Object performing temperature measurement.
 
 
 <a id="run"></a>
+
 ## run()
 
 #### Description
-The execution method, which should be called frequently, usually in the loop function of a sketch.
+The execution method as the implementation of the virtual method from parent class, which should be called frequently, usually in the loop function of a sketch.
 - The method executes conversion for all sensors on the bus at once.
 - The final temperature is calculated as a mean (average) of temperature values measured by all sensors.
 
-#### Syntax
-	void run();
-
-#### Parameters
-None
-
-#### Returns
-None
-
-#### Example
-Calling methods in the sketch loop.
-```cpp
-gbj_appthermo_ds thermo = gbj_appthermo_ds(4, 10);
-
-void loop()
-{
-  thermo.run();
-}
-```
-
 [Back to interface](#interface)
 
 
-<a id="setPeriod"></a>
-## setPeriod()
+<a id="period"></a>
+
+## setPeriod(), getPeriod()
 
 #### Description
-The method sets a new internal timer period as a measurement interval. It allows to dynamically change a frequency of temperature measurement.
-
-#### Syntax
-    void setPeriod(unsigned long period)
-
-#### Parameters
-* **period**: Duration of a repeating interval in milliseconds.
-  * *Valid values*: 0 ~ 2^32 * 1
-  * *Default value*: none
-
-#### Returns
-None
-
-#### See also
-[getPeriod()](#getPeriod)
-
-[Back to interface](#interface)
-
-
-<a id="getPeriod"></a>
-## getPeriod()
-
-#### Description
-The method returns current internal timer period, i.e., frequency of the temperature measurement.
-
-#### Syntax
-    unsigned long getPeriod()
-
-#### Parameters
-None
-
-#### Returns
-Current timer period in milliseconds.
-
-#### See also
-[setPeriod()](#getPeriod)
+The methods are just straitforward implementation of the virual methods from the parent class.
 
 [Back to interface](#interface)
 
 
 <a id="getSensors"></a>
+
 ## getSensors()
 
 #### Description
@@ -169,6 +122,7 @@ Number of active sensors on the bus.
 
 
 <a id="getTemperature"></a>
+
 ## getTemperature()
 
 #### Description
@@ -192,6 +146,7 @@ The final temperature in degrees of Celsius averaged from all active sensors.
 
 
 <a id="isMeasured"></a>
+
 ## isMeasured()
 
 #### Description
