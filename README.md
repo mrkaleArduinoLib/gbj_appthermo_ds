@@ -61,7 +61,7 @@ Constructor creates the class instance object and initiates internal resources.
 - The input resolution is set to all sensors on the bus.
 
 #### Syntax
-    gbj_appthermo_ds(byte pinBus, byte resolution);
+    gbj_appthermo_ds(byte pinBus, byte resolution)
 
 #### Parameters
 
@@ -154,7 +154,7 @@ The method returns a flag whether the recent temperature measurement has been su
 - In case of fail measurement it is not worth to read final temperature by method [getTemperature](#getTemperature).
 
 #### Syntax
-    bool isMeasured();
+    bool isMeasured()
 
 #### Parameters
 None
