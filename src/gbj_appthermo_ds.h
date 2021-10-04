@@ -86,6 +86,7 @@ public:
       if (isSuccess())
       {
         SERIAL_VALUE_UNIT("temperature", getTemperature(), "'C");
+        SERIAL_VALUE("sensors", getSensors());
       }
       else
       {
