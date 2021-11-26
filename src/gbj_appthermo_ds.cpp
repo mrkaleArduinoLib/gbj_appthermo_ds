@@ -35,36 +35,36 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
 
 gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
 {
-  _sensors = 0;
-  _temperature = 0.0;
+  sensors_ = 0;
+  temperature_ = 0.0;
   // Scan all sensor on the bus
-  if (_sensor->conversion())
+  if (sensor_->conversion())
   {
-    return errorHandler(_sensor->getLastResult());
+    return errorHandler(sensor_->getLastResult());
   }
-  while (_sensor->isSuccess(_sensor->sensors()))
+  while (sensor_->isSuccess(sensor_->sensors()))
   {
     // Ignore power-up temperature
-    if (_sensor->getTemperature() != _sensor->getTemperatureIni())
+    if (sensor_->getTemperature() != sensor_->getTemperatureIni())
     {
-      _sensors++;
-      _temperature += _sensor->getTemperature();
+      sensors_++;
+      temperature_ += sensor_->getTemperature();
     }
     // Correct resolution for next run
-    if (_sensor->getResolutionBits() != _resolution)
+    if (sensor_->getResolutionBits() != resolution_)
     {
-      SERIAL_VALUE("resolution", _sensor->getResolutionBits());
-      _sensor->cacheResolutionBits(_resolution);
-      if (_sensor->setCache())
+      SERIAL_VALUE("resolution", sensor_->getResolutionBits());
+      sensor_->cacheResolutionBits(resolution_);
+      if (sensor_->setCache())
       {
-        return errorHandler(_sensor->getLastResult());
+        return errorHandler(sensor_->getLastResult());
       }
     }
   }
   // Calculate average temperature
-  if (_sensors)
+  if (sensors_)
   {
-    _temperature /= _sensors;
+    temperature_ /= sensors_;
     return setLastResult();
   }
   else

@@ -62,9 +62,9 @@ public:
   */
   inline gbj_appthermo_ds(byte pinBus, byte resolution)
   {
-    _sensor = new gbj_ds18b20(pinBus);
-    _timer = new gbj_timer(Timing::PERIOD_MEASURE);
-    _resolution = constrain(resolution, 9, 12);
+    sensor_ = new gbj_ds18b20(pinBus);
+    timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
+    resolution_ = constrain(resolution, 9, 12);
   }
 
   /*
@@ -80,7 +80,7 @@ public:
   */
   inline void run()
   {
-    if (_timer->run())
+    if (timer_->run())
     {
       measure();
       if (isSuccess())
@@ -96,14 +96,14 @@ public:
   }
 
   // Setters
-  inline void setPeriod(unsigned long period) { _timer->setPeriod(period); }
+  inline void setPeriod(unsigned long period) { timer_->setPeriod(period); }
 
   // Getters
-  inline unsigned long getPeriod() { return _timer->getPeriod(); }
-  inline float getTemperature() { return _temperature; }
-  inline byte getSensors() { return _sensors; }
-  inline byte getResolutionBits() { return _sensor->getResolutionBits(); }
-  inline float getResolutionTemp() { return _sensor->getResolutionTemp(); }
+  inline unsigned long getPeriod() { return timer_->getPeriod(); }
+  inline float getTemperature() { return temperature_; }
+  inline byte getSensors() { return sensors_; }
+  inline byte getResolutionBits() { return sensor_->getResolutionBits(); }
+  inline float getResolutionTemp() { return sensor_->getResolutionTemp(); }
   inline bool isMeasured() { return isSuccess(); }
 
 private:
@@ -111,11 +111,11 @@ private:
   {
     PERIOD_MEASURE = 1000,
   };
-  gbj_timer *_timer;
-  gbj_ds18b20 *_sensor;
-  byte _resolution;
-  byte _sensors;
-  float _temperature;
+  gbj_timer *timer_;
+  gbj_ds18b20 *sensor_;
+  byte resolution_;
+  byte sensors_;
+  float temperature_;
 
   ResultCodes measure();
   ResultCodes errorHandler(gbj_ds18b20::ResultCodes errSensor);
