@@ -47,6 +47,13 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
     // Ignore power-up temperature
     if (sensor_->getTemperature() != sensor_->getTemperatureIni())
     {
+      // Export individual temperatures
+      if (listSensors_ && listCount_ && sensors_ < listCount_)
+      {
+        listSensors_[sensors_].id = sensor_->getId();
+        listSensors_[sensors_].temperature = sensor_->getTemperature();
+      }
+      // Count and sum temperature for average
       sensors_++;
       temperature_ += sensor_->getTemperature();
     }

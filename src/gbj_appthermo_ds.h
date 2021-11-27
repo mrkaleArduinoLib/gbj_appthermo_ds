@@ -40,6 +40,12 @@ class gbj_appthermo_ds : gbj_appbase
 public:
   static const String VERSION;
 
+  typedef struct Temperatures
+  {
+    byte id;
+    float temperature;
+  } Temperatures;
+
   /*
     Constructor
 
@@ -65,6 +71,37 @@ public:
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
+  }
+
+  /*
+    Initialization.
+
+    DESCRIPTION:
+    The method declares external array of sensors' ids and their last known
+    temperature.
+    - The method is useful when multiple sensors measure in various spaces and
+      the mean temperature is useless.
+    - The method does not need to be called in a sketch's setup when only
+      average temperature from all active sensors on the bus is desired.
+
+    PARAMETERS:
+    listSensors - A pointer to an external array corresponding structure type.
+      - Data type: Temperatures
+      - Default value: 0
+      - Limited range: system address space
+    listCount - Number of interested sensors records (rows, structures) in the
+      list of sensors' temperatures. Maximum the number of active sensors on
+      the bus is used.
+      - Data type: size_t
+      - Default value: 0
+      - Limited range: 0 ~ getSensors()
+
+    RETURN: None
+  */
+  inline void begin(Temperatures *listSensors = 0, size_t listCount = 0)
+  {
+    listSensors_ = listSensors;
+    listCount_ = listCount;
   }
 
   /*
@@ -113,8 +150,10 @@ private:
   };
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
+  Temperatures *listSensors_;
   byte resolution_;
   byte sensors_;
+  byte listCount_;
   float temperature_;
 
   ResultCodes measure();
