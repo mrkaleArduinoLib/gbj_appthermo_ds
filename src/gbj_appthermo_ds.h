@@ -100,6 +100,7 @@ public:
   */
   inline void begin(Temperatures *listSensors = 0, size_t listCount = 0)
   {
+    SERIAL_VALUE("begin-sensors", listCount);
     listSensors_ = listSensors;
     listCount_ = listCount;
   }

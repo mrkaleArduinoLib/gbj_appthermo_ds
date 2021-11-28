@@ -53,7 +53,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
         listSensors_[sensors_].id = sensor_->getId();
         listSensors_[sensors_].temperature = sensor_->getTemperature();
       }
-      // Count and sum temperature for average
+      // Count sensor and sum temperature for average
       sensors_++;
       temperature_ += sensor_->getTemperature();
     }
