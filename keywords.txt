@@ -10,6 +10,7 @@ gbj_appthermo_ds	KEYWORD1
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+begin	KEYWORD2
 run	KEYWORD2
 setPeriod	KEYWORD2
 getPeriod	KEYWORD2

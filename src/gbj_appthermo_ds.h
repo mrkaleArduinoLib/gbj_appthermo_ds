@@ -77,21 +77,26 @@ public:
     Initialization.
 
     DESCRIPTION:
-    The method declares external array of sensors' ids and their last known
-    temperature.
+    The method exports last known temperature from sensors, which ids are
+    present in the external referenced array.
+    - The method ignores a sensor's temperature that is equal to initial
+      temperature, which is sign of failed conversion (measurement).
     - The method is useful when multiple sensors measure in various spaces and
-      the mean temperature is useless.
-    - The method does not need to be called in a sketch's setup when only
-      average temperature from all active sensors on the bus is desired.
+      the mean temperature might be useless.
+    - The temperature is exported only for sensors that are active on the bus
+      and have ids present in the input array.
+    - The method calculates average temperature in either case from all active
+      sensors on the bus.
+    - The method does not need to be called in a sketch's setup, if temperature
+      of individual sensors is not desired.
 
     PARAMETERS:
-    listSensors - A pointer to an external array corresponding structure type.
+    listSensors - Pointer to an external array corresponding structure type
+      with sensor identifier in the field `id` of items.
       - Data type: Temperatures
       - Default value: 0
       - Limited range: system address space
-    listCount - Number of interested sensors records (rows, structures) in the
-      list of sensors' temperatures. Maximum the number of active sensors on
-      the bus is used.
+    listCount - Number of records (rows, structures) in the list.
       - Data type: size_t
       - Default value: 0
       - Limited range: 0 ~ getSensors()
@@ -100,7 +105,8 @@ public:
   */
   inline void begin(Temperatures *listSensors = 0, size_t listCount = 0)
   {
-    SERIAL_VALUE("begin-sensors", listCount);
+    SERIAL_TITLE("begin");
+    SERIAL_VALUE("Exports", listCount);
     listSensors_ = listSensors;
     listCount_ = listCount;
   }
@@ -123,8 +129,8 @@ public:
       measure();
       if (isSuccess())
       {
-        SERIAL_VALUE_UNIT("temperature", getTemperature(), "'C");
         SERIAL_VALUE("sensors", getSensors());
+        SERIAL_VALUE("tempAvg", getTemperature());
       }
       else
       {
