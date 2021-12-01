@@ -71,44 +71,17 @@ public:
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
-  }
-
-  /*
-    Initialization.
-
-    DESCRIPTION:
-    The method exports last known temperature from sensors, which ids are
-    present in the external referenced array.
-    - The method ignores a sensor's temperature that is equal to initial
-      temperature, which is sign of failed conversion (measurement).
-    - The method is useful when multiple sensors measure in various spaces and
-      the mean temperature might be useless.
-    - The temperature is exported only for sensors that are active on the bus
-      and have ids present in the input array.
-    - The method calculates average temperature in either case from all active
-      sensors on the bus.
-    - The method does not need to be called in a sketch's setup, if temperature
-      of individual sensors is not desired.
-
-    PARAMETERS:
-    listSensors - Pointer to an external array corresponding structure type
-      with sensor identifier in the field `id` of items.
-      - Data type: Temperatures
-      - Default value: 0
-      - Limited range: system address space
-    listCount - Number of records (rows, structures) in the list.
-      - Data type: size_t
-      - Default value: 0
-      - Limited range: 0 ~ getSensors()
-
-    RETURN: None
-  */
-  inline void begin(Temperatures *listSensors = 0, size_t listCount = 0)
-  {
-    SERIAL_TITLE("begin");
-    SERIAL_VALUE("Exports", listCount);
-    listSensors_ = listSensors;
-    listCount_ = listCount;
+    // Create cache for sensors id and temperature
+    listCount_ = sensor_->getSensors();
+    if (listCount_)
+    {
+      byte i = 0;
+      listSensors_ = new Temperatures[listCount_];
+      while (sensor_->isSuccess(sensor_->sensors()))
+      {
+        listSensors_[i++].id = sensor_->getId();
+      }
+    }
   }
 
   /*
@@ -149,6 +122,8 @@ public:
   inline byte getResolutionBits() { return sensor_->getResolutionBits(); }
   inline float getResolutionTemp() { return sensor_->getResolutionTemp(); }
   inline bool isMeasured() { return isSuccess(); }
+  inline Temperatures *getCache() { return listSensors_; }
+  inline byte getCacheSize() { return listCount_; }
 
 private:
   enum Timing : unsigned int
@@ -158,9 +133,9 @@ private:
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
   Temperatures *listSensors_;
+  byte listCount_;
   byte resolution_;
   byte sensors_;
-  byte listCount_;
   float temperature_;
 
   ResultCodes measure();

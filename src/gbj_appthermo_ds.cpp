@@ -44,31 +44,29 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   }
   while (sensor_->isSuccess(sensor_->sensors()))
   {
+    // Update individual sensors
+    if (listCount_)
+    {
+      // Find sensor id in cache
+      for (byte i = 0; i < listCount_; i++)
+      {
+        if (listSensors_[i].id == sensor_->getId())
+        {
+          listSensors_[i].temperature = sensor_->getTemperature();
+          SERIAL_LOG4("id=",
+                      listSensors_[i].id,
+                      SERIAL_F(", temp="),
+                      listSensors_[i].temperature);
+          break;
+        }
+      }
+    }
     // Ignore power-up temperature
     if (sensor_->getTemperature() != sensor_->getTemperatureIni())
     {
       // Count sensor and sum its temperature for average
-      SERIAL_ACTION("id=");
-      SERIAL_CHAIN3(sensor_->getId(),
-                  SERIAL_F(", temp="),
-                  sensor_->getTemperature());
       sensors_++;
       temperature_ += sensor_->getTemperature();
-      // Find declared individual sensors and export their temperatures
-      if (listSensors_ && listCount_)
-      {
-        // Find sensor id in input array
-        for (byte i = 0; i < listCount_; i++)
-        {
-          if (listSensors_[i].id == sensor_->getId())
-          {
-            listSensors_[i].temperature = sensor_->getTemperature();
-            SERIAL_ACTION_END_CHAIN("...exported");
-            break;
-          }
-        }
-      }
-      SERIAL_LINE;
     }
     // Correct resolution for next run
     if (sensor_->getResolutionBits() != resolution_)
