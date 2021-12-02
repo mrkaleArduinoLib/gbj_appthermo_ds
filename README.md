@@ -5,7 +5,8 @@ This is an application library, which is used usually as a project library for p
 
 * Library specifies (inherits from) the system `gbj_appbase` library.
 * It utilizes error handling from the parent class.
-* It averages temperatures from all sensors as an final temperature.
+* It averages temperatures from all sensors.
+* It creates internal cache with identifiers and recent temperatures of all active temperature sensors on the one-wire bus.
 
 
 <a id="dependency"></a>
@@ -42,21 +43,21 @@ Other constants and enumerations are inherited from the parent library.
 ## Interface
 
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
-* [begin()](#begin)
 * [run()](#run)
 * [setPeriod()](#period)
 * [getPeriod()](#period)
 * [getSensors()](#getSensors)
 * [getTemperature()](#getTemperature)
+* [getCachePtr()](#getCachePtr)
 * [isMeasured()](#isMeasured)
 
 
 ## Custom data types
 
-* [Temperatures](#temperatures)
+* [Temperatures](#Temperatures)
 
 
-<a id="temperatures"></a>
+<a id="Temperatures"></a>
 
 ## Temperatures
 
@@ -120,41 +121,6 @@ Object performing temperature measurement.
 [Back to interface](#interface)
 
 
-<a id="begin"></a>
-
-## begin()
-
-#### Description
-The method exports last known temperature from sensors, which identifiers are present in the external array referenced as input argument.
-* The method ignores a sensor's temperature that is equal to initial temperature, which is sign of failed conversion (measurement).
-* The method calculates average temperature in either case from all active sensors on the bus ignoring sensors after failed conversion.
-* The method is useful when multiple sensors measure in various spaces or environments and the average temperature might be useless.
-* The temperature is exported only for sensors that are active on the bus and have identifiers present in the input array.
-* The method does not need to be called in a sketch, if none of sensors are individually observed.
-
-#### Syntax
-    begin(Temperatures *listSensors, size_t listCount)
-
-#### Parameters
-
-* **listSensors**: Pointer to an external array of corresponding structure type with sensor identifier in the field `id` of items. The array acts as a list of individually observed sensors. It has to be populated with identifier of desired sensor externally before calling the method.
-  * *Valid values*: system address space
-  * *Default value*: 0
-
-
-* **listCount**: Number of individually observed sensors (records, rows, structures) in the list. The real number of updated sensor records can be lower due to ignoring sensors after failed conversion and not present or active on the one-wire bus.
-  * *Valid values*: non-negative integer
-  * *Default value*: 0
-
-#### Returns
-None
-
-#### See also
-[Temperatures](#temperatures)
-
-[Back to interface](#interface)
-
-
 <a id="run"></a>
 
 ## run()
@@ -182,7 +148,7 @@ The methods are just straitforward implementation of the virual methods from the
 ## getSensors()
 
 #### Description
-The method returns number of active temperature sensors DS18B20 on the one-wire bus, from which the final average temperature has been calculated.
+The method returns number of active temperature sensors DS18B20 on the one-wire bus.
 
 #### Syntax
     byte getSensors()
@@ -201,9 +167,9 @@ Number of active sensors on the bus.
 ## getTemperature()
 
 #### Description
-The method returns final (the recent known) temperature regadless the recent measurement has been successful or not.
-* In case of failed recent measurement at all sensors on the bus the final temperature is `0`.
-* The precision of the final temperature value (number of used fraction digits), but not precision of the measurement itself, depends on the measurement resolution set by [constructor](#gbj_appthermo_ds).
+The method returns the recently known averaged temperature from all active sensors with successful recent conversion.
+* In case of entirelly failed conversion at all sensors on the bus the average temperature is `0`.
+* The precision of the averaged temperature value, but not precision of the measurement itself, depends on the measurement resolution (number of used fraction digits) of sensors set by [constructor](#gbj_appthermo_ds).
 
 #### Syntax
     float getTemperature()
@@ -212,10 +178,34 @@ The method returns final (the recent known) temperature regadless the recent mea
 None
 
 #### Returns
-The final temperature in degrees of Celsius averaged from all active sensors.
+The averaged temperature in degrees of Celsius.
 
 #### See also
 [isMeasured()](#isMeasured)
+
+[Back to interface](#interface)
+
+
+<a id="getCachePtr"></a>
+
+## getCachePtr()
+
+#### Description
+The method provides pointer to the internal sensors cache, which is an array of type [Temperatures](#Temperatures) and size of number of active temperature sensors on the one-wire bus published by getter [getSensors](#getSensors). This number can be obtained with corresponding getter of the parrent
+* The method puts in the cache identifier and current temperature of all active sensors on the bus regardless those with failed conversion (measurement). Such sensor have initial temperature in the cache instead.
+* The method calculates average temperature in either case from all active sensors on the bus ignoring sensors with failed conversion.
+
+#### Syntax
+    Temperatures *getCachePtr()
+
+#### Parameters
+None
+
+#### Returns
+Pointer to the internal cache.
+
+#### See also
+[Temperatures](#Temperatures)
 
 [Back to interface](#interface)
 

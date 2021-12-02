@@ -72,11 +72,10 @@ public:
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
     // Create cache for sensors id and temperature
-    listCount_ = sensor_->getSensors();
-    if (listCount_)
+    if (getSensors())
     {
       byte i = 0;
-      listSensors_ = new Temperatures[listCount_];
+      listSensors_ = new Temperatures[getSensors()];
       while (sensor_->isSuccess(sensor_->sensors()))
       {
         listSensors_[i++].id = sensor_->getId();
@@ -118,12 +117,11 @@ public:
   // Getters
   inline unsigned long getPeriod() { return timer_->getPeriod(); }
   inline float getTemperature() { return temperature_; }
-  inline byte getSensors() { return sensors_; }
+  inline byte getSensors() { return sensor_->getSensors(); }
   inline byte getResolutionBits() { return sensor_->getResolutionBits(); }
   inline float getResolutionTemp() { return sensor_->getResolutionTemp(); }
   inline bool isMeasured() { return isSuccess(); }
-  inline Temperatures *getCache() { return listSensors_; }
-  inline byte getCacheSize() { return listCount_; }
+  inline Temperatures *getCachePtr() { return listSensors_; }
 
 private:
   enum Timing : unsigned int
@@ -133,9 +131,7 @@ private:
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
   Temperatures *listSensors_;
-  byte listCount_;
   byte resolution_;
-  byte sensors_;
   float temperature_;
 
   ResultCodes measure();

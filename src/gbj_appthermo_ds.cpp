@@ -35,7 +35,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
 
 gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
 {
-  sensors_ = 0;
+  byte temps = 0;
   temperature_ = 0.0;
   // Scan all sensor on the bus
   if (sensor_->conversion())
@@ -45,27 +45,23 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   while (sensor_->isSuccess(sensor_->sensors()))
   {
     // Update individual sensors
-    if (listCount_)
+    for (byte i = 0; i < getSensors(); i++)
     {
-      // Find sensor id in cache
-      for (byte i = 0; i < listCount_; i++)
+      if (listSensors_[i].id == sensor_->getId())
       {
-        if (listSensors_[i].id == sensor_->getId())
-        {
-          listSensors_[i].temperature = sensor_->getTemperature();
-          SERIAL_LOG4("id=",
-                      listSensors_[i].id,
-                      SERIAL_F(", temp="),
-                      listSensors_[i].temperature);
-          break;
-        }
+        listSensors_[i].temperature = sensor_->getTemperature();
+        SERIAL_LOG4("id=",
+                    listSensors_[i].id,
+                    SERIAL_F(", temp="),
+                    listSensors_[i].temperature);
+        break;
       }
     }
     // Ignore power-up temperature
     if (sensor_->getTemperature() != sensor_->getTemperatureIni())
     {
       // Count sensor and sum its temperature for average
-      sensors_++;
+      temps++;
       temperature_ += sensor_->getTemperature();
     }
     // Correct resolution for next run
@@ -80,9 +76,9 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
     }
   }
   // Calculate average temperature
-  if (sensors_)
+  if (temps)
   {
-    temperature_ /= sensors_;
+    temperature_ /= temps;
     return setLastResult();
   }
   else
