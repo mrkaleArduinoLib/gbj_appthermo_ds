@@ -87,7 +87,6 @@ Custom data type declaring structure with temperature sensor identifiers (CRC fi
   * *Valid values*: real numbers -55.0 ~ +125.0
   * *Default value*: none
 
-#### See also
 [Back to interface](#interface)
 
 
@@ -191,8 +190,8 @@ The averaged temperature in degrees of Celsius.
 ## getCachePtr()
 
 #### Description
-The method provides pointer to the internal sensors cache, which is an array of type [Temperatures](#Temperatures) and size of number of active temperature sensors on the one-wire bus published by getter [getSensors](#getSensors). This number can be obtained with corresponding getter of the parrent
-* The method puts in the cache identifier and current temperature of all active sensors on the bus regardless those with failed conversion (measurement). Such sensor have initial temperature in the cache instead.
+The method provides pointer to the internal sensors cache, which is an array of type [Temperatures](#Temperatures) and size of number of active temperature sensors on the one-wire bus published by getter [getSensors](#getSensors).
+* The method puts the identifier and the current temperature of all active sensors on the bus in the cache regardless of those with failed conversion (measurement). Such sensors have initial temperature in the cache instead.
 * The method calculates average temperature in either case from all active sensors on the bus ignoring sensors with failed conversion.
 
 #### Syntax
