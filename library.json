@@ -1,10 +1,10 @@
 {
-  "name": "gbj_appwifi",
-  "keywords": "application",
-  "description": "Library executes connection to a WiFi network.",
+  "name": "gbj_appthermo_ds",
+  "keywords": "application, sensors, temperature, onewire, 1-wire, bus, dallas",
+  "description": "Library manages measurement with multiple temperature sensors Dallas Maxim DS18B20.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mrkaleArduinoLib/gbj_appwifi.git"
+    "url": "https://github.com/mrkaleArduinoLib/gbj_appthermo_ds.git"
   },
   "version": "1.0.0",
   "frameworks": "arduino",
@@ -15,6 +15,8 @@
   "dependencies": {
     "mrkaleArduinoLib/gbj_appbase": "*",
     "mrkaleArduinoLib/gbj_serial_debug": "*",
-    "mrkaleArduinoLib/gbj_timer": "*"
+    "mrkaleArduinoLib/gbj_timer": "*",
+    "mrkaleArduinoLib/gbj_ds18b20": "*",
+    "paulstoffregen/OneWire": "*"
   }
 }
