@@ -54,7 +54,30 @@ Other constants and enumerations are inherited from the parent library.
 
 ## Custom data types
 
+* [Handler()](#handler)
 * [Temperatures](#Temperatures)
+
+
+<a id="handler"></a>
+
+## Handler
+
+#### Description
+The template or the signature of a handler function, which is called after every internal timer run, regardless of succesful or failed temperature measurement.
+* A handler is just a bare function without any input parameters and returning nothing.
+* A handler can be declared just as `void` type. It is not needed to be declared as `gbj_appthermo_ds::Handler` type.
+
+#### Syntax
+    gbj_appthermo_ds::Handler handler()
+    void handler()
+
+#### Parameters
+None
+
+#### Returns
+None
+
+[Back to interface](#interface)
 
 
 <a id="Temperatures"></a>
@@ -63,7 +86,6 @@ Other constants and enumerations are inherited from the parent library.
 
 #### Description
 Custom data type declaring structure with temperature sensor identifiers (CRC field of hardware ROM) and their actual temperature in centigrades.
-
 * The data type is primarily aim for definition two dimensional arrays, while their items represent sensor records.
 
 #### Declaration
@@ -128,6 +150,10 @@ Object performing temperature measurement.
 The execution method as the implementation of the virtual method from parent class, which should be called frequently, usually in the loop function of a sketch.
 * The method executes conversion for all sensors on the bus at once.
 * The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
+* The handler is called at every run, if it is declared in the constructor.
+
+#### See also
+[Handler()](#handler)
 
 [Back to interface](#interface)
 

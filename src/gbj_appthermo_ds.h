@@ -35,11 +35,12 @@
 #undef SERIAL_PREFIX
 #define SERIAL_PREFIX "gbj_appthermo_ds"
 
-class gbj_appthermo_ds : gbj_appbase
+class gbj_appthermo_ds : public gbj_appbase
 {
 public:
   static const String VERSION;
 
+  typedef void Handler();
   typedef struct Temperatures
   {
     byte id;
@@ -58,16 +59,22 @@ public:
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 0 ~ 255
-
     resolution - Number of bits for measurement resolution.
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 9 ~ 12
+    handler - Pointer to a function within a sketch that receives no parameters
+      and returns no value, and is called within every internal timer run,
+      regardless of successful or failed temperature measurement.
+      - Data type: Handler
+      - Default value: 0
+      - Limited range: system address range
 
     RETURN: object
   */
-  inline gbj_appthermo_ds(byte pinBus, byte resolution)
+  inline gbj_appthermo_ds(byte pinBus, byte resolution, Handler *handler = 0)
   {
+    handler_ = handler;
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
@@ -108,6 +115,10 @@ public:
       {
         SERIAL_VALUE("error", getLastResult());
       }
+      if (handler_)
+      {
+        handler_();
+      }
     }
   }
 
@@ -128,6 +139,7 @@ private:
   {
     PERIOD_MEASURE = 1000,
   };
+  Handler *handler_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
   Temperatures *listSensors_;
