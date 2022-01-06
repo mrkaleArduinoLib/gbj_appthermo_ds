@@ -119,11 +119,12 @@ Custom data type declaring structure with temperature sensor identifiers (CRC fi
 #### Description
 Constructor creates the class instance object and initiates internal resources.
 * It inputs operational parameters for temperature sensors.
-* It creates one internal timer without a timer handler for periodical temperature measurement in default interval `5 seconds`.
+* It creates one internal timer for periodical temperature measurement in default interval `5 seconds`.
+* The constructor accepts two external handlers for broadcasting temperature measurement and errors, which act as timer handlers.
 * The input resolution is set to all sensors on the bus.
 
 #### Syntax
-    gbj_appthermo_ds(byte pinBus, byte resolution)
+    gbj_appthermo_ds(byte pinBus, byte resolution, Handler *handlerData, Handler *handlerErr)
 
 #### Parameters
 
@@ -136,8 +137,21 @@ Constructor creates the class instance object and initiates internal resources.
   * *Valid values*: positive integers 9 ~ 12
   * *Default value*: none
 
+
+* **handlerData**: Pointer to a function within a sketch that receives no parameters and returns no value, and is called within every internal timer run at successful temperature measurement.
+  * *Valid values*: system address range
+  * *Default value*: 0
+
+
+* **handlerErr**: Pointer to a function within a sketch that receives no parameters and returns no value, and is called within every internal timer run at failed temperature measurement.
+  * *Valid values*: system address range
+  * *Default value*: 0
+
 #### Returns
 Object performing temperature measurement.
+
+#### See also
+[Handler()](#handler)
 
 [Back to interface](#interface)
 
@@ -150,10 +164,12 @@ Object performing temperature measurement.
 The execution method as the implementation of the virtual method from parent class, which should be called frequently, usually in the loop function of a sketch.
 * The method executes conversion for all sensors on the bus at once.
 * The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
-* The handler is called at every run, if it is declared in the constructor.
+* The handlers is called at every run, if it is declared in the constructor.
 
 #### See also
 [Handler()](#handler)
+
+[gbj_appthermo_ds()](#gbj_appthermo_ds)
 
 [Back to interface](#interface)
 
