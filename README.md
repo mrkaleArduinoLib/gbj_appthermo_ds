@@ -63,13 +63,12 @@ Other constants and enumerations are inherited from the parent library.
 ## Handler
 
 #### Description
-The template or the signature of a handler function, which is called after every internal timer run, regardless of succesful or failed temperature measurement.
+The template or the signature of a callback function, which is called after every internal timer run, regardless of succesful or failed temperature measurement.
 * A handler is just a bare function without any input parameters and returning nothing.
-* A handler can be declared just as `void` type. It is not needed to be declared as `gbj_appthermo_ds::Handler` type.
+* A handler can be declared just as `void` type.
 
 #### Syntax
-    gbj_appthermo_ds::Handler handler()
-    void handler()
+    typedef void Handler()
 
 #### Parameters
 None
@@ -124,7 +123,7 @@ Constructor creates the class instance object and initiates internal resources.
 * The input resolution is set to all sensors on the bus.
 
 #### Syntax
-    gbj_appthermo_ds(byte pinBus, byte resolution, Handler *handlerData, Handler *handlerErr)
+    gbj_appthermo_ds(byte pinBus, byte resolution, Handler *onMeasurer)
 
 #### Parameters
 
@@ -138,14 +137,15 @@ Constructor creates the class instance object and initiates internal resources.
   * *Default value*: none
 
 
-* **handlerData**: Pointer to a function within a sketch that receives no parameters and returns no value, and is called within every internal timer run at successful temperature measurement.
+* **onMeasure**: Pointer to a callback function that receives no parameters and returns no value, and is called within every internal timer run at successful as well as failed temperature measurement.
   * *Valid values*: system address range
   * *Default value*: 0
 
-
-* **handlerErr**: Pointer to a function within a sketch that receives no parameters and returns no value, and is called within every internal timer run at failed temperature measurement.
-  * *Valid values*: system address range
-  * *Default value*: 0
+#### Example
+```cpp
+void onThermo() { Serial.println(thermo.getTemperature()); }
+gbj_appthermo thermo = gbj_appthermo_ds(pin, resolution, onThermo);
+```
 
 #### Returns
 Object performing temperature measurement.

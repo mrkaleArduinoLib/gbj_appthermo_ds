@@ -63,28 +63,18 @@ public:
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 9 ~ 12
-    handlerData - Pointer to a function within a sketch that receives no
+    onMeasure - Pointer to a callback function within that receives no
       parameters and returns no value, and is called within every internal timer
-      run at successful temperature measurement.
-      - Data type: Handler
-      - Default value: 0
-      - Limited range: system address range
-    handlerErr - Pointer to a function within a sketch that receives no
-      parameters and returns no value, and is called within every internal timer
-      run at failed temperature measurement.
+      run at successful as well as failed temperature measurement.
       - Data type: Handler
       - Default value: 0
       - Limited range: system address range
 
     RETURN: object
   */
-  inline gbj_appthermo_ds(byte pinBus,
-                          byte resolution,
-                          Handler *handlerData = 0,
-                          Handler *handlerErr = 0)
+  inline gbj_appthermo_ds(byte pinBus, byte resolution, Handler *onMeasure = 0)
   {
-    handlerData_ = handlerData;
-    handlerErr_ = handlerErr;
+    onMeasure_ = onMeasure;
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
@@ -105,7 +95,7 @@ public:
 
     DESCRIPTION:
     The method should be called in an application sketch loop.
-    It processes main functionality and is control by the internal timer.
+    It processes main functionality and is controlled by the internal timer.
 
     PARAMETERS: None
 
@@ -120,18 +110,14 @@ public:
       {
         SERIAL_VALUE("sensors", getSensors());
         SERIAL_VALUE("tempAvg", getTemperature());
-        if (handlerData_)
-        {
-          handlerData_();
-        }
       }
       else
       {
         SERIAL_VALUE("error", getLastResult());
-        if (handlerErr_)
-        {
-          handlerErr_();
-        }
+      }
+      if (onMeasure_)
+      {
+        onMeasure_();
       }
     }
   }
@@ -153,8 +139,7 @@ private:
   {
     PERIOD_MEASURE = 1000,
   };
-  Handler *handlerData_;
-  Handler *handlerErr_;
+  Handler *onMeasure_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
   Temperatures *listSensors_;
