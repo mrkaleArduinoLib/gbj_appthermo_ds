@@ -47,6 +47,7 @@ Other constants and enumerations are inherited from the parent library.
 * [setPeriod()](#period)
 * [getPeriod()](#period)
 * [getSensors()](#getSensors)
+* [getSensorIds()](#getSensorIds)
 * [getTemperature()](#getTemperature)
 * [getCachePtr()](#getCachePtr)
 * [isMeasured()](#isMeasured)
@@ -199,6 +200,25 @@ None
 
 #### Returns
 Number of active sensors on the bus.
+
+[Back to interface](#interface)
+
+
+<a id="getSensorIds"></a>
+
+## getSensorIds()
+
+#### Description
+The method composes a textual list of temperature sensors' identifiers in form _\<count\>(\<id1\>, \<id2\>, ...)_, e.g. 2(108, 35). The list is suitable for publishing to IoT platforms.
+
+#### Syntax
+    const char *getSensorIds()
+
+#### Parameters
+None
+
+#### Returns
+Pointer to the textual list of temperature sensors's identifiers.
 
 [Back to interface](#interface)
 

@@ -15,6 +15,7 @@ run	KEYWORD2
 setPeriod	KEYWORD2
 getPeriod	KEYWORD2
 getSensors	KEYWORD2
+getSensorIds	KEYWORD2
 getTemperature	KEYWORD2
 getCachePtr	KEYWORD2
 isMeasured	KEYWORD2
