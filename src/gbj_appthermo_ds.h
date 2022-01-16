@@ -87,24 +87,8 @@ public:
       {
         listSensors_[i++].id = sensor_->getId();
       }
-      /*
-        Textual list of temperature sensors' identifiers.
-
-        DESCRIPTION:
-        The block composes a textual list of temperature sensors' identifiers
-        in form <count>(<id1>, <id2>, ...), e.g. 2(108, 35). The list is
-        suitable for publishing to IoT platforms.
-      */
-      {
-        String result = String(getSensors()) + " (";
-        for (byte i = 0; i < getSensors(); i++)
-        {
-          result += (i ? ", " : "") + String(listSensors_[i].id);
-        }
-        result += ")";
-        strcpy(buffer_, result.c_str());
-      }
     }
+    setSensorIds();
   }
 
   /*
@@ -146,7 +130,7 @@ public:
   inline unsigned long getPeriod() { return timer_->getPeriod(); }
   inline float getTemperature() { return temperature_; }
   inline byte getSensors() { return sensor_->getSensors(); }
-  inline const char *getSensorIds() { return buffer_; }
+  inline const char *getSensorIds() { return sensorIds_; }
   inline byte getResolutionBits() { return sensor_->getResolutionBits(); }
   inline float getResolutionTemp() { return sensor_->getResolutionTemp(); }
   inline bool isMeasured() { return isSuccess(); }
@@ -163,10 +147,32 @@ private:
   Temperatures *listSensors_;
   byte resolution_;
   float temperature_;
-  char buffer_[20];
+  char sensorIds_[20];
 
   ResultCodes measure();
   ResultCodes errorHandler(gbj_ds18b20::ResultCodes errSensor);
+  /*
+    Textual list of temperature sensors' identifiers.
+
+    DESCRIPTION:
+    The block composes a textual list of temperature sensors' identifiers
+    in form <count>(<id1>, <id2>, ...), e.g. 2(108, 35). The list is
+    suitable for publishing to IoT platforms.
+  */
+  inline void setSensorIds()
+  {
+    String result = String(getSensors());
+    if (getSensors())
+    {
+      result += " (";
+      for (byte i = 0; i < getSensors(); i++)
+      {
+        result += (i ? ", " : "") + String(listSensors_[i].id);
+      }
+      result += ")";
+    }
+    strcpy(sensorIds_, result.c_str());
+  }
 };
 
 #endif
