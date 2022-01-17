@@ -4,7 +4,7 @@ const String gbj_appthermo_ds::VERSION = "GBJ_APPTHERMO_DS 1.2.0";
 gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
   gbj_ds18b20::ResultCodes errSensor)
 {
-  setLastResult(ResultCodes::ERROR_UKNOWN);
+  setLastResult(ResultCodes::ERROR_UNKNOWN);
   switch (errSensor)
   {
     case gbj_ds18b20::SUCCESS:
