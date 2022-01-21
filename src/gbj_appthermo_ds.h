@@ -41,6 +41,13 @@ public:
   static const String VERSION;
 
   typedef void Handler();
+
+  struct Handlers
+  {
+    Handler *onMeasureSuccess;
+    Handler *onMeasureFail;
+  };
+
   typedef struct Temperatures
   {
     byte id;
@@ -63,18 +70,18 @@ public:
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 9 ~ 12
-    onMeasure - Pointer to a callback function within that receives no
-      parameters and returns no value, and is called within every internal timer
-      run at successful as well as failed temperature measurement.
-      - Data type: Handler
-      - Default value: 0
+    handlers - A structure with pointers to various callback handler functions.
+      - Data type: Handlers
+      - Default value: structure with zeroed all handlers
       - Limited range: system address range
 
     RETURN: object
   */
-  inline gbj_appthermo_ds(byte pinBus, byte resolution, Handler *onMeasure = 0)
+  inline gbj_appthermo_ds(byte pinBus,
+                          byte resolution,
+                          Handlers handlers = Handlers())
   {
-    onMeasure_ = onMeasure;
+    handlers_ = handlers;
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
@@ -111,14 +118,18 @@ public:
       {
         SERIAL_VALUE("sensors", getSensors());
         SERIAL_VALUE("tempAvg", getTemperature());
+        if (handlers_.onMeasureSuccess)
+        {
+          handlers_.onMeasureSuccess();
+        }
       }
       else
       {
         SERIAL_VALUE("error", getLastResult());
-      }
-      if (onMeasure_)
-      {
-        onMeasure_();
+        if (handlers_.onMeasureFail)
+        {
+          handlers_.onMeasureFail();
+        }
       }
     }
   }
@@ -141,7 +152,7 @@ private:
   {
     PERIOD_MEASURE = 1000,
   };
-  Handler *onMeasure_;
+  Handlers handlers_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
   Temperatures *listSensors_;
