@@ -5,20 +5,21 @@
 #######################################
 # Datatypes (KEYWORD1)
 #######################################
-gbj_appthermo_ds	KEYWORD1
 Handler	KEYWORD1
+Handlers	KEYWORD1
+Temperature	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
+gbj_appthermo_ds	KEYWORD2
 run	KEYWORD2
 setPeriod	KEYWORD2
 getPeriod	KEYWORD2
-getSensors	KEYWORD2
 getSensorIds	KEYWORD2
 getTemperature	KEYWORD2
+getSensorPtr	KEYWORD2
 getCachePtr	KEYWORD2
-isMeasured	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

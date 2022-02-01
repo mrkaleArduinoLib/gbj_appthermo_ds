@@ -45,7 +45,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   while (sensor_->isSuccess(sensor_->sensors()))
   {
     // Update individual sensors
-    for (byte i = 0; i < getSensors(); i++)
+    for (byte i = 0; i < sensor_->getSensors(); i++)
     {
       if (listSensors_[i].id == sensor_->getId())
       {

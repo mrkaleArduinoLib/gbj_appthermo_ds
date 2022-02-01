@@ -1,21 +1,36 @@
 <a id="library"></a>
 
 # gbj\_appthermo_ds
-This is an application library, which is used usually as a project library for particular PlatformIO project. The library utilizes all active temperature sensors `DS18B20` on one-wire bus for measuring the ambient temperature.
+This is an application library, which is used usually as a project library for particular PlatformIO project. It encapsulates the functionality of `DS18B20 temperature sensors`. The encapsulation provides following advantages:
 
-* Library specifies (inherits from) the system `gbj_appbase` library.
-* It utilizes error handling from the parent class.
-* It averages temperatures from all sensors.
+* Functionality is hidden from the main sketch.
+* The library follows the principle `separation of concern`.
+* The library is reusable for various projects without need to code temperature measurement management.
+* Update in library is valid for all involved projects.
+* It specifies (inherits from) the parent application library `gbj_appbase`.
+* It utilizes funcionality and error handling from the parent class.
+
+
+## Fundamental functionality
+* The library averages temperatures from all active sensors on one-wire bus.
 * It creates internal cache with identifiers and recent temperatures of all active temperature sensors on the one-wire bus.
+* The library utilizes internal timer for periodical temperature measurement.
+
+
+<a id="internals"></a>
+
+## Internal parameters
+Internal parameter is hard-coded in the library as enumerations and has neither setter nor getter associated.
+
+* **Temperature measurement period** (1000 ms): It is a default time period for temperature measurement.
 
 
 <a id="dependency"></a>
 
 ## Dependency
-
 * **gbj\_appbase**: Parent library for all application libraries loaded from the file `gbj_appbase.h`.
-* **gbj\_timer**: Library for executing internal timer within an instance object loaded from the file `gbj_timer.h`.
 * **gbj\_serial\_debug**: Auxilliary library for debug serial output loaded from the file `gbj_serial_debug.h`. It enables to exclude serial outputs from final compilation.
+* **gbj\_timer**: Library for executing internal timer within an instance object loaded from the file `gbj_timer.h`.
 * **gbj\_ds18b20**: Library for processing temperature sensors `DS18B20` loaded from the file `gbj_ds18b20.h`.
 
 #### Arduino platform
@@ -32,31 +47,28 @@ This is an application library, which is used usually as a project library for p
 <a id="constants"></a>
 
 ## Constants
+* **VERSION**: Name and semantic version of the library.
 
-* **gbj\_appthermo_ds::VERSION**: Name and semantic version of the library.
-
-Other constants and enumerations are inherited from the parent library.
+Other constants, enumerations, result codes, and error codes are inherited from the parent library.
 
 
 <a id="interface"></a>
 
-## Interface
 
+## Custom data types
+* [Handler](#handler)
+* [Handlers](#handlers)
+* [Temperature](#Temperature)
+
+## Interface
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
 * [run()](#run)
 * [setPeriod()](#period)
 * [getPeriod()](#period)
-* [getSensors()](#getSensors)
 * [getSensorIds()](#getSensorIds)
 * [getTemperature()](#getTemperature)
+* [getSensorPtr()](#getSensorPtr)
 * [getCachePtr()](#getCachePtr)
-* [isMeasured()](#isMeasured)
-
-
-## Custom data types
-
-* [Handler()](#handler)
-* [Temperatures](#Temperatures)
 
 
 <a id="handler"></a>
@@ -64,7 +76,7 @@ Other constants and enumerations are inherited from the parent library.
 ## Handler
 
 #### Description
-The template or the signature of a callback function, which is called after every internal timer run, regardless of succesful or failed temperature measurement.
+The template or the signature of a callback function, which is called at particular event in the processing. It can be utilized for instant communicating with other modules of the application (project).
 * A handler is just a bare function without any input parameters and returning nothing.
 * A handler can be declared just as `void` type.
 
@@ -77,35 +89,85 @@ None
 #### Returns
 None
 
+#### See also
+[Handlers](#handlers)
+
 [Back to interface](#interface)
 
 
-<a id="Temperatures"></a>
+<a id="handlers"></a>
 
-## Temperatures
+## Handlers
 
 #### Description
-Custom data type declaring structure with temperature sensor identifiers (CRC field of hardware ROM) and their actual temperature in centigrades.
-* The data type is primarily aim for definition two dimensional arrays, while their items represent sensor records.
+Structure of pointers to handlers each for particular event in processing.
+* Individual or all handlers do not need to be defined in the main sketch, just those that are useful.
+
+#### Syntax
+    struct Handlers
+    {
+        Handler *onMeasureSuccess;
+        Handler *onMeasureFail;
+    }
+
+#### Parameters
+* **onMeasureSuccess**: Pointer to a callback function, which is call after successful temperature measurement.
+  * *Valid values*: system address range
+  * *Default value*: none
+
+
+* **onMeasureFail**: Pointer to a callback function, which is call after failed temperature measurement.
+  * *Data type*: Handler
+  * *Default value*: none
+
+#### Example
+```cpp
+void onThermoSuccess()
+{
+  ...
+}
+void onThermoFail()
+{
+  ...
+}
+gbj_appthermo_ds::Handlers handlersThermo = { .onMeasureSuccess = onThermoSuccess,
+                                              .onMeasureFail = onThermoFail };
+gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
+```
+
+#### See also
+[Handler](#handler)
+
+[gbj_appthermo_ds](#gbj_appthermo_ds)
+
+[Back to interface](#interface)
+
+
+<a id="Temperature"></a>
+
+## Temperature
+
+#### Description
+Structure with temperature sensor identifiers (CRC field of hardware ROM) and their actual temperature in centigrades.
+* The structure is primarily aimed as definition of a sensor record.
 
 #### Declaration
-    typedef struct Temperatures
+    struct Temperature
     {
       byte id;
       float temperature;
-    } Temperatures;
+    };
 
 #### Syntax
-    gbj_appthermo_ds::Temperatures thermoRecords[]
+    Temperature thermoRecords[]
 
 #### Parameters
-
 * **id**: Identifier of a temperature sensor.
   * *Valid values*: positive integers 0 ~ 255
   * *Default value*: none
 
 
-* **temperature**: Temperature in centigrades as recent know value of a sensor.
+* **temperature**: Temperature in centigrades as recent known value of a sensor.
   * *Valid values*: real numbers -55.0 ~ +125.0
   * *Default value*: none
 
@@ -119,40 +181,32 @@ Custom data type declaring structure with temperature sensor identifiers (CRC fi
 #### Description
 Constructor creates the class instance object and initiates internal resources.
 * It inputs operational parameters for temperature sensors.
-* It creates one internal timer for periodical temperature measurement in default interval `5 seconds`.
-* The constructor accepts two external handlers for broadcasting temperature measurement and errors, which act as timer handlers.
+* It creates an internal timer for periodical temperature measurement.
 * The input resolution is set to all sensors on the bus.
 
 #### Syntax
-    gbj_appthermo_ds(byte pinBus, byte resolution, Handler *onMeasurer)
+    gbj_appthermo_ds(byte pinBus, byte resolution, Handlers handlers)
 
 #### Parameters
-
 * **pinBus**: Number of GPIO pin of the microcontroller managing one-wire bus.
   * *Valid values*: positive integers 0 ~ 255
   * *Default value*: none
 
 
-* **resolution**: Number of bits for measurement resolution.
+* **resolution**: Number of bits for temperature measurement resolution.
   * *Valid values*: positive integers 9 ~ 12
   * *Default value*: none
 
 
-* **onMeasure**: Pointer to a callback function that receives no parameters and returns no value, and is called within every internal timer run at successful as well as failed temperature measurement.
-  * *Valid values*: system address range
-  * *Default value*: 0
-
-#### Example
-```cpp
-void onThermo() { Serial.println(thermo.getTemperature()); }
-gbj_appthermo thermo = gbj_appthermo_ds(pin, resolution, onThermo);
-```
+* **handlers**: Pointer to a structure of callback functions. This structure as well as handlers should be defined in the main sketch.
+  * *Data type*: Handlers
+  * *Default value*: empty structure
 
 #### Returns
 Object performing temperature measurement.
 
 #### See also
-[Handler()](#handler)
+[Handlers()](#handlers)
 
 [Back to interface](#interface)
 
@@ -162,13 +216,13 @@ Object performing temperature measurement.
 ## run()
 
 #### Description
-The execution method as the implementation of the virtual method from parent class, which should be called frequently, usually in the loop function of a sketch.
+The execution method as the implementation of the virtual method from the parent class, which should be called frequently, usually in the loop function of a sketch.
 * The method executes conversion for all sensors on the bus at once.
 * The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
-* The handlers is called at every run, if it is declared in the constructor.
+* The handlers are called at every run, if they are declared in the constructor.
 
 #### See also
-[Handler()](#handler)
+[Handlers()](#handlers)
 
 [gbj_appthermo_ds()](#gbj_appthermo_ds)
 
@@ -185,31 +239,12 @@ The methods are just straitforward implementation of the virual methods from the
 [Back to interface](#interface)
 
 
-<a id="getSensors"></a>
-
-## getSensors()
-
-#### Description
-The method returns number of active temperature sensors DS18B20 on the one-wire bus.
-
-#### Syntax
-    byte getSensors()
-
-#### Parameters
-None
-
-#### Returns
-Number of active sensors on the bus.
-
-[Back to interface](#interface)
-
-
 <a id="getSensorIds"></a>
 
 ## getSensorIds()
 
 #### Description
-The method composes a textual list of temperature sensors' identifiers in form _\<count\>(\<id1\>, \<id2\>, ...)_, e.g. 2(108, 35). The list is suitable for publishing to IoT platforms.
+The method composes a textual list of temperature sensors' identifiers in form _\<count\>(\<id1\>, \<id2\>, ...)_, e.g. 2(108, 35).
 
 #### Syntax
     const char *getSensorIds()
@@ -241,8 +276,33 @@ None
 #### Returns
 The averaged temperature in degrees of Celsius.
 
-#### See also
-[isMeasured()](#isMeasured)
+[Back to interface](#interface)
+
+
+<a id="getSensorPtr"></a>
+
+## getSensorPtr()
+
+#### Description
+The method returns the pointer to the internal object controlling the DS18B20 temperature sensor itself. It allows to utilize entire interface of the corresponding library `gbj_ds18b20` without wrapping or mirroring it.
+
+#### Syntax
+	gbj_ds18b20 *getSensorPtr()
+
+#### Parameters
+None
+
+#### Returns
+Pointer to the control object of the DS18B20 temperature sensor hardware.
+
+#### Example
+```cpp
+gbj_appthermo_ds thermo = gbj_appthermo_ds(...);
+void setup()
+{
+  thermo.getSensorPtr()->getSensors();
+}
+```
 
 [Back to interface](#interface)
 
@@ -252,40 +312,20 @@ The averaged temperature in degrees of Celsius.
 ## getCachePtr()
 
 #### Description
-The method provides pointer to the internal sensors cache, which is an array of type [Temperatures](#Temperatures) and size of number of active temperature sensors on the one-wire bus published by getter [getSensors](#getSensors).
+The method provides pointer to the internal sensors cache, which is an array of type [Temperature](#Temperature) and size of number of active temperature sensors on the one-wire bus.
 * The method puts the identifier and the current temperature of all active sensors on the bus in the cache regardless of those with failed conversion (measurement). Such sensors have initial temperature in the cache instead.
 * The method calculates average temperature in either case from all active sensors on the bus ignoring sensors with failed conversion.
 
 #### Syntax
-    Temperatures *getCachePtr()
+    Temperature *getCachePtr()
 
 #### Parameters
 None
 
 #### Returns
-Pointer to the internal cache.
+Pointer to the internal cache of temperature sensors identifiers and recent known temperatures.
 
 #### See also
-[Temperatures](#Temperatures)
-
-[Back to interface](#interface)
-
-
-<a id="isMeasured"></a>
-
-## isMeasured()
-
-#### Description
-The method returns a flag whether the recent temperature measurement has been successful as a whole.
-* In case of fail measurement it is not worth to read final temperature by method [getTemperature](#getTemperature).
-
-#### Syntax
-    bool isMeasured()
-
-#### Parameters
-None
-
-#### Returns
-Flag about temperature measurement success.
+[Temperature](#Temperature)
 
 [Back to interface](#interface)

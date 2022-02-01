@@ -48,11 +48,11 @@ public:
     Handler *onMeasureFail;
   };
 
-  typedef struct Temperatures
+  struct Temperature
   {
     byte id;
     float temperature;
-  } Temperatures;
+  };
 
   /*
     Constructor
@@ -86,10 +86,10 @@ public:
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
     // Create cache for sensors id and temperature
-    if (getSensors())
+    if (sensor_->getSensors())
     {
       byte i = 0;
-      listSensors_ = new Temperatures[getSensors()];
+      listSensors_ = new Temperature[sensor_->getSensors()];
       while (sensor_->isSuccess(sensor_->sensors()))
       {
         listSensors_[i++].id = sensor_->getId();
@@ -116,7 +116,7 @@ public:
       measure();
       if (isSuccess())
       {
-        SERIAL_VALUE("sensors", getSensors());
+        SERIAL_VALUE("sensors", sensor_->getSensors());
         SERIAL_VALUE("tempAvg", getTemperature());
         if (handlers_.onMeasureSuccess)
         {
@@ -140,12 +140,9 @@ public:
   // Getters
   inline unsigned long getPeriod() { return timer_->getPeriod(); }
   inline float getTemperature() { return temperature_; }
-  inline byte getSensors() { return sensor_->getSensors(); }
   inline const char *getSensorIds() { return sensorIds_; }
-  inline byte getResolutionBits() { return sensor_->getResolutionBits(); }
-  inline float getResolutionTemp() { return sensor_->getResolutionTemp(); }
-  inline bool isMeasured() { return isSuccess(); }
-  inline Temperatures *getCachePtr() { return listSensors_; }
+  inline gbj_ds18b20 *getSensorPtr() { return sensor_; }
+  inline Temperature *getCachePtr() { return listSensors_; }
 
 private:
   enum Timing : unsigned int
@@ -155,7 +152,7 @@ private:
   Handlers handlers_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
-  Temperatures *listSensors_;
+  Temperature *listSensors_;
   byte resolution_;
   float temperature_;
   char sensorIds_[20];
@@ -172,11 +169,11 @@ private:
   */
   inline void setSensorIds()
   {
-    String result = String(getSensors());
-    if (getSensors())
+    String result = String(sensor_->getSensors());
+    if (sensor_->getSensors())
     {
       result += " (";
-      for (byte i = 0; i < getSensors(); i++)
+      for (byte i = 0; i < sensor_->getSensors(); i++)
       {
         result += (i ? ", " : "") + String(listSensors_[i].id);
       }
