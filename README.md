@@ -54,7 +54,6 @@ Other constants, enumerations, result codes, and error codes are inherited from 
 
 <a id="interface"></a>
 
-
 ## Custom data types
 * [Handler](#handler)
 * [Handlers](#handlers)
@@ -106,19 +105,13 @@ Structure of pointers to handlers each for particular event in processing.
 #### Syntax
     struct Handlers
     {
-        Handler *onMeasureSuccess;
-        Handler *onMeasureFail;
+      Handler *onMeasureSuccess;
+      Handler *onMeasureFail;
     }
 
 #### Parameters
 * **onMeasureSuccess**: Pointer to a callback function, which is call after successful temperature measurement.
-  * *Valid values*: system address range
-  * *Default value*: none
-
-
 * **onMeasureFail**: Pointer to a callback function, which is call after failed temperature measurement.
-  * *Data type*: Handler
-  * *Default value*: none
 
 #### Example
 ```cpp
