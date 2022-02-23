@@ -1,5 +1,4 @@
 #include "gbj_appthermo_ds.h"
-const String gbj_appthermo_ds::VERSION = "GBJ_APPTHERMO_DS 1.2.0";
 
 gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
   gbj_ds18b20::ResultCodes errSensor)

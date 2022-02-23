@@ -38,7 +38,7 @@
 class gbj_appthermo_ds : public gbj_appbase
 {
 public:
-  static const String VERSION;
+  const String VERSION = "GBJ_APPTHERMO_DS 1.2.0";
 
   typedef void Handler();
 
