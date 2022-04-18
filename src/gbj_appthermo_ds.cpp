@@ -43,19 +43,6 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   }
   while (sensor_->isSuccess(sensor_->sensors()))
   {
-    // Update individual sensors
-    for (byte i = 0; i < sensor_->getSensors(); i++)
-    {
-      if (listSensors_[i].id == sensor_->getId())
-      {
-        listSensors_[i].temperature = sensor_->getTemperature();
-        SERIAL_LOG4("id=",
-                    listSensors_[i].id,
-                    SERIAL_F(", temp="),
-                    listSensors_[i].temperature);
-        break;
-      }
-    }
     // Ignore power-up temperature
     if (sensor_->getTemperature() != sensor_->getTemperatureIni())
     {

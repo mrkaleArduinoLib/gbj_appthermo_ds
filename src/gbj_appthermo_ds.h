@@ -38,7 +38,7 @@
 class gbj_appthermo_ds : public gbj_appbase
 {
 public:
-  const char *VERSION = "GBJ_APPTHERMO_DS 1.2.0";
+  const char *VERSION = "GBJ_APPTHERMO_DS 1.3.0";
 
   typedef void Handler();
 
@@ -46,12 +46,6 @@ public:
   {
     Handler *onMeasureSuccess;
     Handler *onMeasureFail;
-  };
-
-  struct Temperature
-  {
-    byte id;
-    float temperature;
   };
 
   /*
@@ -85,17 +79,6 @@ public:
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
-    // Create cache for sensors id and temperature
-    if (sensor_->getSensors())
-    {
-      byte i = 0;
-      listSensors_ = new Temperature[sensor_->getSensors()];
-      while (sensor_->isSuccess(sensor_->sensors()))
-      {
-        listSensors_[i++].id = sensor_->getId();
-      }
-    }
-    setSensorIds();
   }
 
   /*
@@ -134,15 +117,18 @@ public:
     }
   }
 
-  // Setters
+  // Set timer period inputed as unsigned long in milliseconds
   inline void setPeriod(unsigned long period) { timer_->setPeriod(period); }
+  // Set timer period inputed as String in seconds
+  inline void setPeriod(String period)
+  {
+    timer_->setPeriod(1000 * (unsigned long)period.toInt());
+  }
 
   // Getters
   inline unsigned long getPeriod() { return timer_->getPeriod(); }
   inline float getTemperature() { return temperature_; }
-  inline const char *getSensorIds() { return sensorIds_; }
   inline gbj_ds18b20 *getSensorPtr() { return sensor_; }
-  inline Temperature *getCachePtr() { return listSensors_; }
 
 private:
   enum Timing : unsigned int
@@ -152,35 +138,11 @@ private:
   Handlers handlers_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
-  Temperature *listSensors_;
   byte resolution_;
   float temperature_;
-  char sensorIds_[20];
 
   ResultCodes measure();
   ResultCodes errorHandler(gbj_ds18b20::ResultCodes errSensor);
-  /*
-    Textual list of temperature sensors' identifiers.
-
-    DESCRIPTION:
-    The block composes a textual list of temperature sensors' identifiers
-    in form <count>(<id1>, <id2>, ...), e.g. 2(108, 35). The list is
-    suitable for publishing to IoT platforms.
-  */
-  inline void setSensorIds()
-  {
-    String result = String(sensor_->getSensors());
-    if (sensor_->getSensors())
-    {
-      result += " (";
-      for (byte i = 0; i < sensor_->getSensors(); i++)
-      {
-        result += (i ? ", " : "") + String(listSensors_[i].id);
-      }
-      result += ")";
-    }
-    strcpy(sensorIds_, result.c_str());
-  }
 };
 
 #endif
