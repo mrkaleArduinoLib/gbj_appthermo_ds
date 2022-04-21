@@ -12,15 +12,14 @@ This is an application library, which is used usually as a project library for p
 
 
 ## Fundamental functionality
-* The library averages temperatures from all active sensors on one-wire bus.
-* It creates internal cache with identifiers and recent temperatures of all active temperature sensors on the one-wire bus.
-* The library utilizes internal timer for periodical temperature measurement.
+* The library averages temperatures from all active sensors on one-wire bus. It is useful when no statistical smoothing of data from individual sensors on the bus is requested, or there is just one active sensor on the bus.
+* The library utilizes internal timer for periodical temperature measurement by sensors conversion.
 
 
 <a id="internals"></a>
 
 ## Internal parameters
-Internal parameter is hard-coded in the library as enumerations and has neither setter nor getter associated.
+Internal parameter is hard-coded as an enumeration literal in the library and has neither setter nor getter associated. However, particular feature of the library utilizing this parameter as a default value usually has got corresponding setter and/or getter.
 
 * **Temperature measurement period** (1000 ms): It is a default time period for temperature measurement.
 
@@ -62,12 +61,10 @@ Other constants, enumerations, result codes, and error codes are inherited from 
 ## Interface
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
 * [run()](#run)
-* [setPeriod()](#period)
-* [getPeriod()](#period)
-* [getSensorIds()](#getSensorIds)
+* [setPeriod()](#setPeriod)
+* [getPeriod()](#getPeriod)
 * [getTemperature()](#getTemperature)
 * [getSensorPtr()](#getSensorPtr)
-* [getCachePtr()](#getCachePtr)
 
 
 <a id="handler"></a>
@@ -136,37 +133,6 @@ gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
 [Back to interface](#interface)
 
 
-<a id="Temperature"></a>
-
-## Temperature
-
-#### Description
-Structure with temperature sensor identifiers (CRC field of hardware ROM) and their actual temperature in centigrades.
-* The structure is primarily aimed as definition of a sensor record.
-
-#### Declaration
-    struct Temperature
-    {
-      byte id;
-      float temperature;
-    };
-
-#### Syntax
-    Temperature thermoRecords[]
-
-#### Parameters
-* **id**: Identifier of a temperature sensor.
-  * *Valid values*: positive integers 0 ~ 255
-  * *Default value*: none
-
-
-* **temperature**: Temperature in centigrades as recent known value of a sensor.
-  * *Valid values*: real numbers -55.0 ~ +125.0
-  * *Default value*: none
-
-[Back to interface](#interface)
-
-
 <a id="gbj_appthermo_ds"></a>
 
 ## gbj_appthermo_ds()
@@ -222,31 +188,57 @@ The execution method as the implementation of the virtual method from the parent
 [Back to interface](#interface)
 
 
-<a id="period"></a>
+<a id="setPeriod"></a>
 
-## setPeriod(), getPeriod()
+## setPeriod()
 
 #### Description
-The methods are just straitforward implementation of the virual methods from the parent class.
+The overloaded method sets a new period of the internal timer in milliseconds inputed either in milliseconds or in seconds.
+* The method with numerical input argument is the implementation of the virtual methods from the parent class.
+* The method with textual input argument is useful with conjunction with a project data hub, which data has always string data type.
+
+#### Syntax
+    void setPeriod(unsigned long period)
+    void setPeriod(String periodSec)
+
+#### Parameters
+* **period**: Duration of a repeating interval of the internal timers in milliseconds.
+  * *Valid values*: 0 ~ 2^32 - 1
+  * *Default value*: none
+
+
+* **periodSec**: Duration of a repeating interval of the internal timers in seconds declared as string.
+  * *Valid values*: String
+  * *Default value*: none
+
+#### Returns
+None
+
+#### See also
+[getPeriod()](#getPeriod)
 
 [Back to interface](#interface)
 
 
-<a id="getSensorIds"></a>
+<a id="getPeriod"></a>
 
-## getSensorIds()
+## getPeriod()
 
 #### Description
-The method composes a textual list of temperature sensors' identifiers in form _\<count\>(\<id1\>, \<id2\>, ...)_, e.g. 2(108, 35).
+The method returns current period of the internal timer.
+* The method is the implementation of the virtual methods from the parent class.
 
 #### Syntax
-    const char *getSensorIds()
+    unsigned long getPeriod()
 
 #### Parameters
 None
 
 #### Returns
-Pointer to the textual list of temperature sensors's identifiers.
+Current timer period in milliseconds.
+
+#### See also
+[setPeriod()](#setPeriod)
 
 [Back to interface](#interface)
 
@@ -277,7 +269,9 @@ The averaged temperature in degrees of Celsius.
 ## getSensorPtr()
 
 #### Description
-The method returns the pointer to the internal object controlling the DS18B20 temperature sensor itself. It allows to utilize entire interface of the corresponding library `gbj_ds18b20` without wrapping or mirroring it.
+The method returns the pointer to the internal object controlling the DS18B20 temperature sensor itself.
+* It allows to utilize entire interface of the corresponding library `gbj_ds18b20` without wrapping or mirroring it.
+* The methods of this internal object are valid for currently selected sensor on the bus.
 
 #### Syntax
 	gbj_ds18b20 *getSensorPtr()
@@ -296,29 +290,5 @@ void setup()
   thermo.getSensorPtr()->getSensors();
 }
 ```
-
-[Back to interface](#interface)
-
-
-<a id="getCachePtr"></a>
-
-## getCachePtr()
-
-#### Description
-The method provides pointer to the internal sensors cache, which is an array of type [Temperature](#Temperature) and size of number of active temperature sensors on the one-wire bus.
-* The method puts the identifier and the current temperature of all active sensors on the bus in the cache regardless of those with failed conversion (measurement). Such sensors have initial temperature in the cache instead.
-* The method calculates average temperature in either case from all active sensors on the bus ignoring sensors with failed conversion.
-
-#### Syntax
-    Temperature *getCachePtr()
-
-#### Parameters
-None
-
-#### Returns
-Pointer to the internal cache of temperature sensors identifiers and recent known temperatures.
-
-#### See also
-[Temperature](#Temperature)
 
 [Back to interface](#interface)
