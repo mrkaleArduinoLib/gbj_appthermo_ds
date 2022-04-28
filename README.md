@@ -21,7 +21,7 @@ This is an application library, which is used usually as a project library for p
 ## Internal parameters
 Internal parameter is hard-coded as an enumeration literal in the library and has neither setter nor getter associated. However, particular feature of the library utilizing this parameter as a default value usually has got corresponding setter and/or getter.
 
-* **Temperature measurement period** (1000 ms): It is a default time period for temperature measurement.
+* **Temperature measurement period** (`1000 ms`): It is a default time period for temperature measurement.
 
 
 <a id="dependency"></a>
