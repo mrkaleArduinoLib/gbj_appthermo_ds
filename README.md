@@ -193,7 +193,7 @@ The execution method as the implementation of the virtual method from the parent
 ## setPeriod()
 
 #### Description
-The overloaded method sets a new period of the internal timer in milliseconds inputed either in milliseconds or in seconds.
+The overloaded method sets a new period of the internal timer in milliseconds input either in milliseconds or in seconds.
 * The method with numerical input argument is the implementation of the virtual methods from the parent class.
 * The method with textual input argument is useful with conjunction with a project data hub, which data has always string data type.
 
