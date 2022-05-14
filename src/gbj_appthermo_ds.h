@@ -46,6 +46,7 @@ public:
   {
     Handler *onMeasureSuccess;
     Handler *onMeasureFail;
+    Handler *onMeasureResol;
   };
 
   /*

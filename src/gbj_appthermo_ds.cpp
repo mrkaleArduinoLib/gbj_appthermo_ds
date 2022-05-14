@@ -59,6 +59,10 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
       {
         return errorHandler(sensor_->getLastResult());
       }
+      else if (handlers_.onMeasureResol)
+      {
+        handlers_.onMeasureResol();
+      }
     }
   }
   // Calculate average temperature

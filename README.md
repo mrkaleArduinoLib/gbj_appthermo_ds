@@ -104,11 +104,13 @@ Structure of pointers to handlers each for particular event in processing.
     {
       Handler *onMeasureSuccess;
       Handler *onMeasureFail;
+      Handler *onMeasureResol;
     }
 
 #### Parameters
-* **onMeasureSuccess**: Pointer to a callback function, which is call after successful temperature measurement.
-* **onMeasureFail**: Pointer to a callback function, which is call after failed temperature measurement.
+* **onMeasureSuccess**: Pointer to a callback function, which is called after successful temperature measurement.
+* **onMeasureFail**: Pointer to a callback function, which is called after failed temperature measurement.
+* **onMeasureResol**: Pointer to a callback function, which is called after changing the temperature measurement resolution.
 
 #### Example
 ```cpp
@@ -120,8 +122,13 @@ void onThermoFail()
 {
   ...
 }
+void onThermoResol()
+{
+  ...
+}
 gbj_appthermo_ds::Handlers handlersThermo = { .onMeasureSuccess = onThermoSuccess,
-                                              .onMeasureFail = onThermoFail };
+                                              .onMeasureFail = onThermoFail,
+                                              .onMeasureResol = onThermoResol };
 gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
 ```
 
