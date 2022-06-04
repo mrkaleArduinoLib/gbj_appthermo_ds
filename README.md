@@ -203,6 +203,7 @@ The execution method as the implementation of the virtual method from the parent
 The overloaded method sets a new period of the internal timer in milliseconds input either in milliseconds or in seconds.
 * The method with numerical input argument is the implementation of the virtual methods from the parent class.
 * The method with textual input argument is useful with conjunction with a project data hub, which data has always string data type.
+* If input period is zero or not numerical (leading to zero), the library sets the [internal default Temperature measurement period](#internals).
 
 #### Syntax
     void setPeriod(unsigned long period)

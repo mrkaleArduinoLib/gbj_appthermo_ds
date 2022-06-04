@@ -38,7 +38,7 @@
 class gbj_appthermo_ds : public gbj_appbase
 {
 public:
-  const char *VERSION = "GBJ_APPTHERMO_DS 1.3.0";
+  const char *VERSION = "GBJ_APPTHERMO_DS 1.4.0";
 
   typedef void Handler();
 
@@ -119,11 +119,14 @@ public:
   }
 
   // Set timer period inputed as unsigned long in milliseconds
-  inline void setPeriod(unsigned long period) { timer_->setPeriod(period); }
+  inline void setPeriod(unsigned long period)
+  {
+    timer_->setPeriod(period == 0 ? Timing::PERIOD_MEASURE : period);
+  }
   // Set timer period inputed as String in seconds
   inline void setPeriod(String periodSec)
   {
-    timer_->setPeriod(1000 * (unsigned long)periodSec.toInt());
+    setPeriod(1000 * (unsigned long)periodSec.toInt());
   }
 
   // Getters

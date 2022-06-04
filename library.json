@@ -1,6 +1,6 @@
 {
   "name": "gbj_appthermo_ds",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Library manages measurement with multiple temperature sensors Dallas Maxim DS18B20.",
   "keywords": "application, sensors, temperature, onewire, 1-wire, bus, dallas",
   "repository": {
