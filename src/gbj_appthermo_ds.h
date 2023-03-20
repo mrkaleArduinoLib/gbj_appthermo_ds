@@ -38,8 +38,6 @@
 class gbj_appthermo_ds : public gbj_appbase
 {
 public:
-  const char *VERSION = "GBJ_APPTHERMO_DS 1.4.0";
-
   typedef void Handler();
 
   struct Handlers

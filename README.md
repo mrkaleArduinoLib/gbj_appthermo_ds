@@ -1,6 +1,6 @@
 <a id="library"></a>
 
-# gbj\_appthermo_ds
+# gbj\_appthermo\_ds
 This is an application library, which is used usually as a project library for particular PlatformIO project. It encapsulates the functionality of `DS18B20 temperature sensors`. The encapsulation provides following advantages:
 
 * Functionality is hidden from the main sketch.
@@ -142,7 +142,7 @@ gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
 
 <a id="gbj_appthermo_ds"></a>
 
-## gbj_appthermo_ds()
+## gbj\_appthermo\_ds()
 
 #### Description
 Constructor creates the class instance object and initiates internal resources.
