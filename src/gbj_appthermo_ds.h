@@ -45,6 +45,7 @@ public:
     Handler *onMeasureSuccess;
     Handler *onMeasureFail;
     Handler *onMeasureResol;
+    Handler *onMeasureSensors;
   };
 
   /*
@@ -78,6 +79,7 @@ public:
     sensor_ = new gbj_ds18b20(pinBus);
     timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
     resolution_ = constrain(resolution, 9, 12);
+    sensors_ = 0;
   }
 
   /*
@@ -98,8 +100,17 @@ public:
       measure();
       if (isSuccess())
       {
-        SERIAL_VALUE("sensors", sensor_->getSensors());
-        SERIAL_VALUE("tempAvg", getTemperature());
+        // Report changes in number of sensors on the bus
+        if (sensor_->getSensors() != sensors_)
+        {
+          SERIAL_LOG4("sensors: ", sensors_, " -> ", sensor_->getSensors())
+          sensors_ = sensor_->getSensors();
+          if (handlers_.onMeasureSensors)
+          {
+            handlers_.onMeasureSensors();
+          }
+        }
+        SERIAL_VALUE("tempAvg", getTemperature())
         if (handlers_.onMeasureSuccess)
         {
           handlers_.onMeasureSuccess();
@@ -107,7 +118,7 @@ public:
       }
       else
       {
-        SERIAL_VALUE("error", getLastResult());
+        SERIAL_VALUE("error", getLastResult())
         if (handlers_.onMeasureFail)
         {
           handlers_.onMeasureFail();
@@ -140,7 +151,7 @@ private:
   Handlers handlers_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
-  byte resolution_;
+  byte resolution_, sensors_;
   float temperature_;
 
   ResultCodes measure();

@@ -53,7 +53,8 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
     // Correct resolution for next run
     if (sensor_->getResolutionBits() != resolution_)
     {
-      SERIAL_VALUE("resolution", sensor_->getResolutionBits());
+      SERIAL_LOG4(
+        "resolution: ", sensor_->getResolutionBits(), " -> ", resolution_)
       sensor_->cacheResolutionBits(resolution_);
       if (sensor_->setCache())
       {

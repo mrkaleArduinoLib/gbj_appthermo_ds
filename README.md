@@ -43,14 +43,6 @@ Internal parameter is hard-coded as an enumeration literal in the library and ha
 * **Particle.h**: Includes alternative (C++) data type definitions.
 
 
-<a id="constants"></a>
-
-## Constants
-* **VERSION**: Name and semantic version of the library.
-
-Other constants, enumerations, result codes, and error codes are inherited from the parent library.
-
-
 <a id="interface"></a>
 
 ## Custom data types
@@ -105,12 +97,14 @@ Structure of pointers to handlers each for particular event in processing.
       Handler *onMeasureSuccess;
       Handler *onMeasureFail;
       Handler *onMeasureResol;
+      Handler *onMeasureSensors;
     }
 
 #### Parameters
 * **onMeasureSuccess**: Pointer to a callback function, which is called after successful temperature measurement.
 * **onMeasureFail**: Pointer to a callback function, which is called after failed temperature measurement.
 * **onMeasureResol**: Pointer to a callback function, which is called after changing the temperature measurement resolution.
+* **onMeasureSensors**: Pointer to a callback function, which is called after changing the number of temperature sensors on the bus. Initially this number is set to zero, so that this handler is always called at least once at the very first measurement.
 
 #### Example
 ```cpp
@@ -126,9 +120,16 @@ void onThermoResol()
 {
   ...
 }
-gbj_appthermo_ds::Handlers handlersThermo = { .onMeasureSuccess = onThermoSuccess,
-                                              .onMeasureFail = onThermoFail,
-                                              .onMeasureResol = onThermoResol };
+void onThermoSensors()
+{
+  ...
+}
+gbj_appthermo_ds::Handlers handlersThermo = {
+  .onMeasureSuccess = onThermoSuccess,
+  .onMeasureFail = onThermoFail,
+  .onMeasureResol = onThermoResol,
+  .onMeasureSensors = onThermoSensors,
+};
 gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
 ```
 
@@ -185,7 +186,7 @@ Object performing temperature measurement.
 The execution method as the implementation of the virtual method from the parent class, which should be called frequently, usually in the loop function of a sketch.
 * The method executes conversion for all sensors on the bus at once.
 * The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
-* The handlers are called at every run, if they are declared in the constructor.
+* The handlers are called at every run, if they are declared in the constructor and corresponding conditions have been met.
 
 #### See also
 [Handlers()](#handlers)
