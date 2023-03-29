@@ -202,21 +202,22 @@ The execution method as the implementation of the virtual method from the parent
 
 #### Description
 The overloaded method sets a new period of the internal timer in milliseconds input either in milliseconds or in seconds.
-* The method with numerical input argument is the implementation of the virtual methods from the parent class.
-* The method with textual input argument is useful with conjunction with a project data hub, which data has always string data type.
+* The method with numerical argument is the implementation of the virtual methods from the parent class and argument is considered in milliseconds.
+* The method with textual argument is useful with conjunction with a project data hub, which data has always string data type and argument is considered in seconds.
 * If input period is zero or not numerical (leading to zero), the library sets the [internal default Temperature measurement period](#internals).
+* The method limits minimal value of the period to conversion period of the temperature sensor(s) according to current measurement resolution in either case.
 
 #### Syntax
     void setPeriod(unsigned long period)
     void setPeriod(String periodSec)
 
 #### Parameters
-* **period**: Duration of a repeating interval of the internal timers in milliseconds.
-  * *Valid values*: 0 ~ 2^32 - 1
+* **period**: Duration of a repeating interval of the internal timer in milliseconds.
+  * *Valid values*: conversionMillis ~ 2^32 - 1
   * *Default value*: none
 
 
-* **periodSec**: Duration of a repeating interval of the internal timers in seconds declared as string.
+* **periodSec**: Duration of a repeating interval of the internal timer in seconds declared as string.
   * *Valid values*: String
   * *Default value*: none
 
