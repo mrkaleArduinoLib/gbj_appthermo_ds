@@ -16,14 +16,6 @@ This is an application library, which is used usually as a project library for p
 * The library utilizes internal timer for periodical temperature measurement by sensors conversion.
 
 
-<a id="internals"></a>
-
-## Internal parameters
-Internal parameter is hard-coded as an enumeration literal in the library and has neither setter nor getter associated. However, particular feature of the library utilizing this parameter as a default value usually has got corresponding setter and/or getter.
-
-* **Temperature measurement period** (`1000 ms`): It is a default time period for temperature measurement.
-
-
 <a id="dependency"></a>
 
 ## Dependency
@@ -48,7 +40,6 @@ Internal parameter is hard-coded as an enumeration literal in the library and ha
 ## Custom data types
 * [Handler](#handler)
 * [Handlers](#handlers)
-* [Temperature](#Temperature)
 
 ## Interface
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
@@ -183,7 +174,7 @@ Object performing temperature measurement.
 ## run()
 
 #### Description
-The execution method as the implementation of the virtual method from the parent class, which should be called frequently, usually in the loop function of a sketch.
+The execution method should be called frequently, usually in the loop function of a sketch.
 * The method executes conversion for all sensors on the bus at once.
 * The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
 * The handlers are called at every run, if they are declared in the constructor and corresponding conditions have been met.
@@ -202,9 +193,8 @@ The execution method as the implementation of the virtual method from the parent
 
 #### Description
 The overloaded method sets a new period of the internal timer in milliseconds input either in milliseconds or in seconds.
-* The method with numerical argument is the implementation of the virtual methods from the parent class and argument is considered in milliseconds.
-* The method with textual argument is useful with conjunction with a project data hub, which data has always string data type and argument is considered in seconds.
-* If input period is zero or not numerical (leading to zero), the library sets the [internal default Temperature measurement period](#internals).
+* The numerical argument of the method is considered in milliseconds.
+* The textual argument of the method is considered in seconds. It is useful with conjunction with a project data hub, which data has always string data type.
 * The method limits minimal value of the period to conversion period of the temperature sensor(s) according to current measurement resolution in either case.
 
 #### Syntax
@@ -213,7 +203,7 @@ The overloaded method sets a new period of the internal timer in milliseconds in
 
 #### Parameters
 * **period**: Duration of a repeating interval of the internal timer in milliseconds.
-  * *Valid values*: conversionMillis ~ 2^32 - 1
+  * *Valid values*: Conversion Millis ~ 2^32 - 1
   * *Default value*: none
 
 
@@ -236,7 +226,6 @@ None
 
 #### Description
 The method returns current period of the internal timer.
-* The method is the implementation of the virtual methods from the parent class.
 
 #### Syntax
     unsigned long getPeriod()

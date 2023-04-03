@@ -77,7 +77,7 @@ public:
   {
     handlers_ = handlers;
     sensor_ = new gbj_ds18b20(pinBus);
-    timer_ = new gbj_timer(Timing::PERIOD_MEASURE);
+    timer_ = new gbj_timer(0);
     resolution_ = constrain(resolution, 9, 12);
     sensors_ = 0;
   }
@@ -130,7 +130,6 @@ public:
   // Set timer period input as unsigned long in milliseconds
   inline void setPeriod(unsigned long period)
   {
-    period = period == 0 ? Timing::PERIOD_MEASURE : period;
     period = max(period, static_cast<unsigned long>(sensor_->getConvMillis()));
     timer_->setPeriod(period);
   }
@@ -146,10 +145,6 @@ public:
   inline gbj_ds18b20 *getSensorPtr() { return sensor_; }
 
 private:
-  enum Timing : unsigned int
-  {
-    PERIOD_MEASURE = 1000,
-  };
   Handlers handlers_;
   gbj_timer *timer_;
   gbj_ds18b20 *sensor_;
