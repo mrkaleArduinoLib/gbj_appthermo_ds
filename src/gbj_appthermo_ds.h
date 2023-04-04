@@ -110,7 +110,6 @@ public:
             handlers_.onMeasureSensors();
           }
         }
-        SERIAL_VALUE("tempAvg", getTemperature())
         if (handlers_.onMeasureSuccess)
         {
           handlers_.onMeasureSuccess();
