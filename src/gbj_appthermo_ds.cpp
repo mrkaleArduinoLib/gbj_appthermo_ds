@@ -12,6 +12,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
 
     case gbj_ds18b20::END_OF_LIST:
     case gbj_ds18b20::ERROR_NO_DEVICE:
+    case gbj_ds18b20::ERROR_NO_SENSOR:
     case gbj_ds18b20::ERROR_CONVERSION:
       setLastResult(ResultCodes::ERROR_NODEVICE);
       break;
