@@ -1,6 +1,6 @@
 {
   "name": "gbj_appthermo_ds",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Library manages measurement with multiple temperature sensors Dallas Maxim DS18B20.",
   "keywords": "application, sensors, temperature, onewire, 1-wire, bus, dallas",
   "repository": {
@@ -14,10 +14,11 @@
     "espressif32"
   ],
   "dependencies": {
-    "mrkaleArduinoLib/gbj_appbase": "*",
-    "mrkaleArduinoLib/gbj_serial_debug": "*",
-    "mrkaleArduinoLib/gbj_timer": "*",
+    "mrkaleArduinoLib/gbj_appcore": "*",
+    "mrkaleArduinoLib/gbj_appfilter": "*",
     "mrkaleArduinoLib/gbj_ds18b20": "*",
+    "mrkaleArduinoLib/gbj_exponential": "*",
+    "mrkaleArduinoLib/gbj_serial_debug": "*",
     "paulstoffregen/OneWire": "*"
   }
 }

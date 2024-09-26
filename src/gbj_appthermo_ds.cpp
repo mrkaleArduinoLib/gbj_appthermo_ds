@@ -35,46 +35,49 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::errorHandler(
 
 gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
 {
-  byte temps = 0;
+  idList_ = "";
+  ids_ = 0;
   temperature_ = 0.0;
-  // Scan all sensor on the bus
+  // Execute conversion for temperature measurement
   if (sensor_->conversion())
   {
     return errorHandler(sensor_->getLastResult());
   }
+  // Scan all sensors on the bus
   while (sensor_->isSuccess(sensor_->sensors()))
   {
-    // Ignore power-up temperature
-    if (sensor_->getTemperature() != sensor_->getTemperatureIni())
+    filter_->setValue(sensor_->getTemperature());
+    if (filter_->isValid())
     {
-      // Count sensor and sum its temperature for average
-      temps++;
-      temperature_ += sensor_->getTemperature();
+      idList_.concat(ids_ > 0 ? ", " : "");
+      idList_.concat(String(sensor_->getId()));
+      ids_++;
+      temperature_ += filter_->getValue();
     }
     // Correct resolution for next run
     if (sensor_->getResolutionBits() != resolution_)
     {
-      SERIAL_LOG4(
-        "resolution: ", sensor_->getResolutionBits(), " -> ", resolution_)
+      SERIAL_CHANGE("Resolution", sensor_->getResolutionBits(), resolution_)
       sensor_->cacheResolutionBits(resolution_);
       if (sensor_->setCache())
       {
         return errorHandler(sensor_->getLastResult());
       }
-      else if (handlers_.onMeasureResol)
+      else if (handlers_.onMeasureResol != nullptr)
       {
         handlers_.onMeasureResol();
       }
     }
   }
   // Calculate average temperature
-  if (temps)
+  if (ids_ > 0)
   {
-    temperature_ /= temps;
+    temperature_ = smooth_->getValue(temperature_ /= ids_);
     return setLastResult();
   }
   else
   {
+    temperature_ = filter_->getMinimum();
     return setLastResult(ResultCodes::ERROR_NODEVICE);
   }
 }

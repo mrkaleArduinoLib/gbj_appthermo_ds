@@ -19,23 +19,20 @@
 #ifndef GBJ_APPTHERMO_DS_H
 #define GBJ_APPTHERMO_DS_H
 
+#include <Arduino.h>
 #if defined(__AVR__)
-  #include <Arduino.h>
   #include <inttypes.h>
-#elif defined(ESP8266) || defined(ESP32)
-  #include <Arduino.h>
-#elif defined(PARTICLE)
-  #include <Particle.h>
 #endif
-#include "gbj_appbase.h"
+#include "gbj_appcore.h"
+#include "gbj_appfilter.h"
 #include "gbj_ds18b20.h"
+#include "gbj_exponential.h"
 #include "gbj_serial_debug.h"
-#include "gbj_timer.h"
 
 #undef SERIAL_PREFIX
 #define SERIAL_PREFIX "gbj_appthermo_ds"
 
-class gbj_appthermo_ds : public gbj_appbase
+class gbj_appthermo_ds : public gbj_appcore
 {
 public:
   typedef void Handler();
@@ -60,6 +57,16 @@ public:
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 0 ~ 255
+    tempMax - Maximum valid temperature.
+      - Data type: float
+      - Default value: none
+    tempMin - Minimum valid temperature.
+      - Data type: float
+      - Default value: 0.0
+    smoothingFactor - Smoothing factor for exponential filtering.
+      - Data type: float
+      - Default value: 0.2
+      - Limited range: 0.0 ~ 1.0
     resolution - Number of bits for measurement resolution.
       - Data type: non-negative integer
       - Default value: none
@@ -72,22 +79,26 @@ public:
     RETURN: object
   */
   inline gbj_appthermo_ds(byte pinBus,
-                          byte resolution,
+                          float tempMax,
+                          float tempMin = 0.0,
+                          float smoothingFactor = 0.2,
+                          byte resolution = 10,
                           Handlers handlers = Handlers())
   {
     handlers_ = handlers;
     sensor_ = new gbj_ds18b20(pinBus);
-    timer_ = new gbj_timer(0);
+    filter_ = new gbj_appfilter<float>(tempMax, tempMin);
+    smooth_ = new gbj_exponential(smoothingFactor);
     resolution_ = constrain(resolution, 9, 12);
-    sensors_ = 0;
   }
 
   /*
     Processing.
 
     DESCRIPTION:
-    The method should be called in an application sketch loop.
-    It processes main functionality and is controlled by the internal timer.
+    The method processes main functionality, i.e., measuring temperature and
+    determining number of valid sensors.
+    - The resulting temperature is the average from all valid sensors.
 
     PARAMETERS: None
 
@@ -95,59 +106,46 @@ public:
   */
   inline void run()
   {
-    if (timer_->run())
+    measure();
+    if (isSuccess())
     {
-      measure();
-      if (isSuccess())
+      // Report changes in number of sensors on the bus
+      if (sensor_->getSensors() != ids_)
       {
-        // Report changes in number of sensors on the bus
-        if (sensor_->getSensors() != sensors_)
+        SERIAL_CHANGE("Sensors", sensor_->getSensors(), ids_)
+        if (handlers_.onMeasureSensors != nullptr)
         {
-          SERIAL_LOG4("sensors: ", sensors_, " -> ", sensor_->getSensors())
-          sensors_ = sensor_->getSensors();
-          if (handlers_.onMeasureSensors)
-          {
-            handlers_.onMeasureSensors();
-          }
-        }
-        if (handlers_.onMeasureSuccess)
-        {
-          handlers_.onMeasureSuccess();
+          handlers_.onMeasureSensors();
         }
       }
-      else
+      if (handlers_.onMeasureSuccess != nullptr)
       {
-        SERIAL_VALUE("error", getLastResult())
-        if (handlers_.onMeasureFail)
-        {
-          handlers_.onMeasureFail();
-        }
+        handlers_.onMeasureSuccess();
+      }
+    }
+    else
+    {
+      SERIAL_VALUE("Measurement ERROR", getLastResult())
+      if (handlers_.onMeasureFail)
+      {
+        handlers_.onMeasureFail();
       }
     }
   }
 
-  // Set timer period input as unsigned long in milliseconds
-  inline void setPeriod(unsigned long period)
-  {
-    period = max(period, static_cast<unsigned long>(sensor_->getConvMillis()));
-    timer_->setPeriod(period);
-  }
-  // Set timer period input as String in seconds
-  inline void setPeriod(String periodSec)
-  {
-    setPeriod(1000 * static_cast<unsigned long>(periodSec.toInt()));
-  }
-
   // Getters
-  inline unsigned long getPeriod() { return timer_->getPeriod(); }
   inline float getTemperature() { return temperature_; }
   inline gbj_ds18b20 *getSensorPtr() { return sensor_; }
+  inline String getIdList() { return idList_; }
+  inline byte getIds() { return ids_; }
 
 private:
   Handlers handlers_;
-  gbj_timer *timer_;
+  gbj_appfilter<float> *filter_;
+  gbj_exponential *smooth_;
   gbj_ds18b20 *sensor_;
-  byte resolution_, sensors_;
+  byte resolution_, ids_;
+  String idList_;
   float temperature_;
 
   ResultCodes measure();

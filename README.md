@@ -7,32 +7,28 @@ This is an application library, which is used usually as a project library for p
 * The library follows the principle `separation of concerns`.
 * The library is reusable for various projects without need to code temperature measurement management.
 * Update in library is valid for all involved projects.
-* It specifies (inherits from) the parent application library `gbj_appbase`.
+* It specifies (inherits from) the parent application library `gbj__appcore`.
 * It utilizes funcionality and error handling from the parent class.
 
 
 ## Fundamental functionality
-* The library averages temperatures from all active sensors on one-wire bus. It is useful when no statistical smoothing of data from individual sensors on the bus is requested, or there is just one active sensor on the bus.
-* The library utilizes internal timer for periodical temperature measurement by sensors conversion.
+* The library averages temperatures from all active and valid sensors on one-wire bus and statistically smooths the average temperature.
+* Valid sensor is one which temperature value is whithin valid range of temperatures.
 
 
 <a id="dependency"></a>
 
 ## Dependency
-* **gbj\_appbase**: Parent library for all application libraries loaded from the file `gbj_appbase.h`.
-* **gbj\_serial\_debug**: Auxilliary library for debug serial output loaded from the file `gbj_serial_debug.h`. It enables to exclude serial outputs from final compilation.
-* **gbj\_timer**: Library for executing internal timer within an instance object loaded from the file `gbj_timer.h`.
+* **gbj\_appcore**: Parent library for all application libraries loaded from the file `gbj_appcore.h`.
+* **gbj\_appfilter**: Library for filtering measured temperature values against a valid range loaded from the file `gbj_appfilter.h`.
 * **gbj\_ds18b20**: Library for processing temperature sensors `DS18B20` loaded from the file `gbj_ds18b20.h`.
+* **gbj\_exponential**: Library for statistical smoothing final average temperature loaded from the file `gbj_exponential.h`.
+* **gbj\_serial\_debug**: Auxilliary library for debug serial output loaded from the file `gbj_serial_debug.h`. It enables to exclude serial outputs from final compilation.
+* **paulstoffregen/OneWire**: Third party library for communication on one-wire bus.
+* **Arduino.h**: Main include file for the Arduino SDK.
 
 #### Arduino platform
-* **Arduino.h**: Main include file for the Arduino SDK.
 * **inttypes.h**: Integer type conversions. This header file includes the exact-width integer definitions and extends them with additional facilities provided by the implementation.
-
-#### Espressif platform
-* **Arduino.h**: Main include file for the Arduino platform.
-
-#### Particle platform
-* **Particle.h**: Includes alternative (C++) data type definitions.
 
 
 <a id="interface"></a>
@@ -44,10 +40,10 @@ This is an application library, which is used usually as a project library for p
 ## Interface
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
 * [run()](#run)
-* [setPeriod()](#setPeriod)
-* [getPeriod()](#getPeriod)
 * [getTemperature()](#getTemperature)
 * [getSensorPtr()](#getSensorPtr)
+* [getIdList()](#getIdList)
+* [getIds()](#getIds)
 
 
 <a id="handler"></a>
@@ -139,22 +135,31 @@ gbj_appthermo_ds thermo = gbj_appthermo_ds(..., handlersThermo);
 #### Description
 Constructor creates the class instance object and initiates internal resources.
 * It inputs operational parameters for temperature sensors.
-* It creates an internal timer for periodical temperature measurement.
 * The input resolution is set to all sensors on the bus.
 
 #### Syntax
-    gbj_appthermo_ds(byte pinBus, byte resolution, Handlers handlers)
+    gbj_appthermo_ds(byte pinBus, float tempMax, float tempMin, float smoothingFactor, byte resolution, Handlers handlers)
 
 #### Parameters
 * **pinBus**: Number of GPIO pin of the microcontroller managing one-wire bus.
   * *Valid values*: positive integers 0 ~ 255
   * *Default value*: none
 
+* **tempMax**: Maximal temperature in centigrades (°C) of valid range.
+  * *Valid values*: rational number
+  * *Default value*: none
+
+* **tempMin**: Minimal temperature in centigrades (°C) of valid range.
+  * *Valid values*: rational number
+  * *Default value*: 0.0
+
+* **smoothingFactor**: Smoothing factor for exponential filtering.
+  * *Valid values*: real number 0.0 ~ 1.0
+  * *Default value*: 0.2
 
 * **resolution**: Number of bits for temperature measurement resolution.
   * *Valid values*: positive integers 9 ~ 12
-  * *Default value*: none
-
+  * *Default value*: 10
 
 * **handlers**: Pointer to a structure of callback functions. This structure as well as handlers should be defined in the main sketch.
   * *Data type*: Handlers
@@ -174,9 +179,12 @@ Object performing temperature measurement.
 ## run()
 
 #### Description
-The execution method should be called frequently, usually in the loop function of a sketch.
+The execution method should be called when the new temperature value is needed, usually in a timer or suitable handler.
 * The method executes conversion for all sensors on the bus at once.
-* The final temperature is calculated as an average (mean) of temperature values measured by all successful sensors.
+* An average (mean) temperature is calculated from temperature values measured by all successful and valid sensors.
+  * Successful sensor is one that communicates on the bus.
+  * Valid sensor is one which temperature value is whithin valid range of temperatures.
+* The final temperature is obtained from statistical smoothing of the average temperature by exponential filtering.
 * The handlers are called at every run, if they are declared in the constructor and corresponding conditions have been met.
 
 #### See also
@@ -187,67 +195,12 @@ The execution method should be called frequently, usually in the loop function o
 [Back to interface](#interface)
 
 
-<a id="setPeriod"></a>
-
-## setPeriod()
-
-#### Description
-The overloaded method sets a new period of the internal timer in milliseconds input either in milliseconds or in seconds.
-* The numerical argument of the method is considered in milliseconds.
-* The textual argument of the method is considered in seconds. It is useful with conjunction with a project data hub, which data has always string data type.
-* The method limits minimal value of the period to conversion period of the temperature sensor(s) according to current measurement resolution in either case.
-
-#### Syntax
-    void setPeriod(unsigned long period)
-    void setPeriod(String periodSec)
-
-#### Parameters
-* **period**: Duration of a repeating interval of the internal timer in milliseconds.
-  * *Valid values*: Conversion Millis ~ 2^32 - 1
-  * *Default value*: none
-
-
-* **periodSec**: Duration of a repeating interval of the internal timer in seconds declared as string.
-  * *Valid values*: String
-  * *Default value*: none
-
-#### Returns
-None
-
-#### See also
-[getPeriod()](#getPeriod)
-
-[Back to interface](#interface)
-
-
-<a id="getPeriod"></a>
-
-## getPeriod()
-
-#### Description
-The method returns current period of the internal timer.
-
-#### Syntax
-    unsigned long getPeriod()
-
-#### Parameters
-None
-
-#### Returns
-Current timer period in milliseconds.
-
-#### See also
-[setPeriod()](#setPeriod)
-
-[Back to interface](#interface)
-
-
 <a id="getTemperature"></a>
 
 ## getTemperature()
 
 #### Description
-The method returns the recently known averaged temperature from all active sensors with successful recent conversion.
+The method returns the recently known averaged and statistically smoothed temperature from all active and valid sensors with successful recent conversion.
 * In case of entirelly failed conversion at all sensors on the bus the average temperature is `0`.
 * The precision of the averaged temperature value, but not precision of the measurement itself, depends on the measurement resolution (number of used fraction digits) of sensors set by [constructor](#gbj_appthermo_ds).
 
@@ -258,7 +211,7 @@ The method returns the recently known averaged temperature from all active senso
 None
 
 #### Returns
-The averaged temperature in degrees of Celsius.
+The averaged temperature in degrees of Celsius (°C).
 
 [Back to interface](#interface)
 
@@ -289,5 +242,52 @@ void setup()
   thermo.getSensorPtr()->getSensors();
 }
 ```
+
+[Back to interface](#interface)
+
+
+<a id="getIdList"></a>
+
+## getIdList()
+
+#### Description
+The method returns comma separated list of identifiers of valid temperature sensors.
+* As a valid temperature sensor is consider a sensor, which measured temperature is within valid range of temperatures.
+* The identifier is the <abbr title='Cyclic Redundancy Code'>CRC</abbr> code of the temperature sensor's <abbr title='Read Only Memory'>ROM</abbr> from its last byte.
+
+#### Syntax
+    String getIdList()
+
+#### Parameters
+None
+
+#### Returns
+Comma separated list of valid temperature sensors' identifiers.
+
+#### See also
+[getIds()](#getIds)
+
+[Back to interface](#interface)
+
+
+<a id="getIds"></a>
+
+## getIds()
+
+#### Description
+The method returns number of valid temperature sensors.
+* As a valid temperature sensor is consider a sensor, which measured temperature is within valid range of temperatures.
+
+#### Syntax
+    byte getIds()
+
+#### Parameters
+None
+
+#### Returns
+Number of valid temperature sensors.
+
+#### See also
+[getIdList()](#getIdList)
 
 [Back to interface](#interface)
