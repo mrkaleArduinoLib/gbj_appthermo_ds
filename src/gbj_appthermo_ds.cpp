@@ -41,6 +41,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   // Execute conversion for temperature measurement
   if (sensor_->conversion())
   {
+    temperature_ = filter_->getMinimum();
     return errorHandler(sensor_->getLastResult());
   }
   // Scan all sensors on the bus

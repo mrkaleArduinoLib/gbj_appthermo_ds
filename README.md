@@ -82,14 +82,14 @@ Structure of pointers to handlers each for particular event in processing.
     struct Handlers
     {
       Handler *onMeasureSuccess;
-      Handler *onMeasureFail;
+      Handler *onMeasureFailure;
       Handler *onMeasureResol;
       Handler *onMeasureSensors;
     }
 
 #### Parameters
 * **onMeasureSuccess**: Pointer to a callback function, which is called after successful temperature measurement.
-* **onMeasureFail**: Pointer to a callback function, which is called after failed temperature measurement.
+* **onMeasureFailure**: Pointer to a callback function, which is called after failed temperature measurement.
 * **onMeasureResol**: Pointer to a callback function, which is called after changing the temperature measurement resolution.
 * **onMeasureSensors**: Pointer to a callback function, which is called after changing the number of temperature sensors on the bus. Initially this number is set to zero, so that this handler is always called at least once at the very first measurement.
 
@@ -99,7 +99,7 @@ void onThermoSuccess()
 {
   ...
 }
-void onThermoFail()
+void onThermoFailure()
 {
   ...
 }
@@ -113,7 +113,7 @@ void onThermoSensors()
 }
 gbj_appthermo_ds::Handlers handlersThermo = {
   .onMeasureSuccess = onThermoSuccess,
-  .onMeasureFail = onThermoFail,
+  .onMeasureFailure = onThermoFailure,
   .onMeasureResol = onThermoResol,
   .onMeasureSensors = onThermoSensors,
 };

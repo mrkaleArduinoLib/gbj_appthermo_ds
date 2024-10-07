@@ -40,7 +40,7 @@ public:
   struct Handlers
   {
     Handler *onMeasureSuccess;
-    Handler *onMeasureFail;
+    Handler *onMeasureFailure;
     Handler *onMeasureResol;
     Handler *onMeasureSensors;
   };
@@ -126,9 +126,9 @@ public:
     else
     {
       SERIAL_VALUE("Measurement ERROR", getLastResult())
-      if (handlers_.onMeasureFail)
+      if (handlers_.onMeasureFailure)
       {
-        handlers_.onMeasureFail();
+        handlers_.onMeasureFailure();
       }
     }
   }
