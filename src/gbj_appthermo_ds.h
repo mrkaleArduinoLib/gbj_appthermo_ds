@@ -25,6 +25,7 @@
 #endif
 #include "gbj_appcore.h"
 #include "gbj_appfilter.h"
+#include "gbj_appstatistics.h"
 #include "gbj_ds18b20.h"
 #include "gbj_exponential.h"
 #include "gbj_serial_debug.h"
@@ -32,7 +33,9 @@
 #undef SERIAL_PREFIX
 #define SERIAL_PREFIX "gbj_appthermo_ds"
 
-class gbj_appthermo_ds : public gbj_appcore
+class gbj_appthermo_ds
+  : public gbj_appcore
+  , gbj_appstatistics
 {
 public:
   typedef void Handler();
@@ -133,11 +136,34 @@ public:
     }
   }
 
-  // Getters
-  inline float getTemperature() { return temperature_; }
+  // Reset statistical values for another statistical period
+  inline void reset()
+  {
+    statMax_.reset();
+    statMin_.reset();
+    statAvg_.reset();
+  }
+
+  // Return pointer to temperature sensor
   inline gbj_ds18b20 *getSensorPtr() { return sensor_; }
+  // Return comma separated list of active temperature sensors' identiviers
   inline String getIdList() { return idList_; }
+  // Return number of active temperature sensors
   inline byte getIds() { return ids_; }
+  // Return recently measured temperature
+  inline float getTemperature() { return temperature_; }
+  // Return average temperature within the current statistical period
+  inline float getTemperatureAvg() { return statAvg_.get(); };
+  // Return maximal temperature within the current statistical period
+  inline float getTemperatureMax() { return statMax_.get(); };
+  // Return minimal temperature within the current statistical period
+  inline float getTemperatureMin() { return statMin_.get(); };
+  // Return uptime milliseconds of the very first maximal temperature within the
+  // current statistical period
+  inline unsigned long getTemperatureMaxTime() { return statMax_.getTime(); };
+  // Return uptime milliseconds of the very first minimal temperature within the
+  // current statistical period
+  inline unsigned long getTemperatureMinTime() { return statMin_.getTime(); };
 
 private:
   Handlers handlers_;
@@ -147,9 +173,19 @@ private:
   byte resolution_, ids_;
   String idList_;
   float temperature_;
-
   ResultCodes measure();
   ResultCodes errorHandler(gbj_ds18b20::ResultCodes errSensor);
+  // Statistical measures
+  StatisticMax statMax_ = StatisticMax();
+  StatisticMin statMin_ = StatisticMin();
+  StatisticAvg statAvg_ = StatisticAvg();
+  // Register resulting temperature for statistical evaluation
+  inline void statRegister()
+  {
+    statMax_.set(temperature_);
+    statMin_.set(temperature_);
+    statAvg_.set(temperature_);
+  }
 };
 
 #endif

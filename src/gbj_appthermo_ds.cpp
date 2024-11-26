@@ -74,6 +74,7 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   if (ids_ > 0)
   {
     temperature_ = smooth_->getValue(temperature_ /= ids_);
+    statRegister();
     return setLastResult();
   }
   else
