@@ -19,20 +19,18 @@
 #ifndef GBJ_APPTHERMO_DS_H
 #define GBJ_APPTHERMO_DS_H
 
-#include <Arduino.h>
-#if defined(__AVR__)
-  #include <inttypes.h>
-#endif
 #include "gbj_appcore.h"
 #include "gbj_appfilter.h"
 #include "gbj_appstatistics.h"
 #include "gbj_ds18b20.h"
 #include "gbj_exponential.h"
 #include "gbj_serial_debug.h"
+#include <Arduino.h>
 
 #undef SERIAL_PREFIX
 #define SERIAL_PREFIX "gbj_appthermo_ds"
 
+// Class definition for DS18B20 thermometers
 class gbj_appthermo_ds
   : public gbj_appcore
   , gbj_appstatistics
@@ -56,24 +54,30 @@ public:
     parameters.
 
     PARAMETERS:
+
     pinBus - Number of GPIO pin of the microcontroller managing one-wire bus.
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 0 ~ 255
+
     tempMax - Maximum valid temperature.
       - Data type: float
       - Default value: none
+
     tempMin - Minimum valid temperature.
       - Data type: float
       - Default value: 0.0
+
     smoothingFactor - Smoothing factor for exponential filtering.
       - Data type: float
       - Default value: 0.2
       - Limited range: 0.0 ~ 1.0
+
     resolution - Number of bits for measurement resolution.
       - Data type: non-negative integer
       - Default value: none
       - Limited range: 9 ~ 12
+
     handlers - A structure with pointers to various callback handler functions.
       - Data type: Handlers
       - Default value: structure with zeroed all handlers
@@ -95,18 +99,8 @@ public:
     resolution_ = constrain(resolution, 9, 12);
   }
 
-  /*
-    Processing.
-
-    DESCRIPTION:
-    The method processes main functionality, i.e., measuring temperature and
-    determining number of valid sensors.
-    - The resulting temperature is the average from all valid sensors.
-
-    PARAMETERS: None
-
-    RETURN: none
-  */
+  // Measuring temperature and determining current number of valid sensors. The
+  // resulting temperature is the average from all valid sensors.
   inline void run()
   {
     measure();
@@ -152,6 +146,11 @@ public:
   inline byte getIds() { return ids_; }
   // Return recently measured temperature
   inline float getTemperature() { return temperature_; }
+  // Return recently measured temperature rounded to input decimal places
+  inline float getTemperatureRound(byte precision = 2)
+  {
+    return roundoff(temperature_, precision);
+  }
   // Return average temperature within the current statistical period
   inline float getTemperatureAvg() { return statAvg_.get(); };
   // Return maximal temperature within the current statistical period
@@ -166,19 +165,35 @@ public:
   inline unsigned long getTemperatureMinTime() { return statMin_.getTime(); };
 
 private:
+  // Utilized handlers
   Handlers handlers_;
+  // Actuator for filtering temperature values
   gbj_appfilter<float> *filter_;
+  // Actuator for statistical smoothing temperature values
   gbj_exponential *smooth_;
+  // Pointer to thermometer sensor object
   gbj_ds18b20 *sensor_;
-  byte resolution_, ids_;
+  // Current temperature measurement resolution code
+  byte resolution_;
+  // Number of active temperature sensors
+  byte ids_;
+  // List of identifiers of active temperature sensors
   String idList_;
+  // Recently measured temperature in Celsius centigrades
   float temperature_;
+
+  // Measure temperature
   ResultCodes measure();
+  // Process and translate errors
   ResultCodes errorHandler(gbj_ds18b20::ResultCodes errSensor);
-  // Statistical measures
+
+  // Object for temperature maximum
   StatisticMax statMax_ = StatisticMax();
+  // Object for temperature minimum
   StatisticMin statMin_ = StatisticMin();
+  // Object for temperature average
   StatisticAvg statAvg_ = StatisticAvg();
+
   // Register resulting temperature for statistical evaluation
   inline void statRegister()
   {

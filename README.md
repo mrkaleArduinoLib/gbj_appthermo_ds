@@ -41,9 +41,16 @@ This is an application library, which is used usually as a project library for p
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
 * [run()](#run)
 * [getTemperature()](#getTemperature)
+* [getTemperatureRound()](#getTemperature)
 * [getSensorPtr()](#getSensorPtr)
 * [getIdList()](#getIdList)
 * [getIds()](#getIds)
+* [getTemperatureAvg()](#statisticsValue)
+* [getTemperatureMin()](#statisticsValue)
+* [getTemperatureMax()](#statisticsValue)
+* [getTemperatureMinTime()](#statisticsTime)
+* [getTemperatureMaxTime()](#statisticsTime)
+* [reset()](#reset)
 
 
 <a id="handler"></a>
@@ -197,21 +204,24 @@ The execution method should be called when the new temperature value is needed, 
 
 <a id="getTemperature"></a>
 
-## getTemperature()
+## getTemperature(), getTemperatureRound()
 
 #### Description
-The method returns the recently known averaged and statistically smoothed temperature from all active and valid sensors with successful recent conversion.
+The methods return the recently known averaged and statistically smoothed temperature from all active and valid sensors with successful recent conversion either with full precision or rounded value.
 * In case of entirelly failed conversion at all sensors on the bus the average temperature is `0`.
 * The precision of the averaged temperature value, but not precision of the measurement itself, depends on the measurement resolution (number of used fraction digits) of sensors set by [constructor](#gbj_appthermo_ds).
 
 #### Syntax
     float getTemperature()
+    float getTemperatureRound(byte precision)
 
 #### Parameters
-None
+* **precision**: Number of decimal places for rounding temperature value.
+  * *Valid values*: positive integers 0 ~ 255
+  * *Default value*: 2
 
 #### Returns
-The averaged temperature in degrees of Celsius (°C).
+The averaged temperature in degrees of Celsius (°C) or rounded to provided decimal places.
 
 [Back to interface](#interface)
 
@@ -289,5 +299,81 @@ Number of valid temperature sensors.
 
 #### See also
 [getIdList()](#getIdList)
+
+[Back to interface](#interface)
+
+
+<a id="statisticsValue"></a>
+
+## getTemperatureAvg(), getTemperatureMin(), getTemperatureMax()
+
+#### Description
+The particular method returns respective statistical value, average, minimum, or maximum of the temperature whithin an observation period.
+- Observation period is the time period since <abbr title='Micro Controller Unit'>MCU</abbr> start or recent reset of statistics by method [reset()](#reset) for which aforementioned statistical values are calculated.
+
+#### Syntax
+    float getTemperatureAvg()
+    float getTemperatureMin()
+    float getTemperatureMax()
+
+#### Parameters
+None
+
+#### Returns
+The respective statistical value of the temperature in degrees of Celsius (°C).
+
+#### See also
+[reset()](#reset)
+
+[getTemperatureMinTime()](#statisticsTime)
+
+[getTemperatureMaxTime()](#statisticsTime)
+
+[Back to interface](#interface)
+
+
+<a id="statisticsTime"></a>
+
+## getTemperatureMinTime(), getTemperatureMaxTime()
+
+#### Description
+The particular method returns MCU uptime in milliseconds when the respective statistical value, minimum or maximum, has been reached the very first time within an observation period.
+- Observation period is the time period since MCU start or recent reset of statistics by method [reset()](#reset) for which aforementioned statistical values are calculated.
+
+#### Syntax
+    unsigned long getTemperatureMinTime()
+    unsigned long getTemperatureMaxTime()
+
+#### Parameters
+None
+
+#### Returns
+The respective statistical value of the temperature in degrees of Celsius (°C).
+
+[Back to interface](#interface)
+
+
+<a id="reset"></a>
+
+## reset()
+
+#### Description
+The method resets all statistical measures and starts new observation period.
+
+#### Syntax
+    void reset()
+
+#### Parameters
+None
+
+#### Returns
+None
+
+#### See also
+[reset()](#reset)
+
+[getTemperatureMin()](#statisticsValue)
+
+[getTemperatureMax()](#statisticsValue)
 
 [Back to interface](#interface)
