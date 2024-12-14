@@ -40,6 +40,8 @@ This is an application library, which is used usually as a project library for p
 ## Interface
 * [gbj_appthermo_ds()](#gbj_appthermo_ds)
 * [run()](#run)
+* [getTemperatureRaw()](#getTemperatureRaw)
+* [getTemperatureRawRound()](#getTemperatureRaw)
 * [getTemperature()](#getTemperature)
 * [getTemperatureRound()](#getTemperature)
 * [getSensorPtr()](#getSensorPtr)
@@ -202,12 +204,43 @@ The execution method should be called when the new temperature value is needed, 
 [Back to interface](#interface)
 
 
+<a id="getTemperatureRaw"></a>
+
+## getTemperatureRaw(), getTemperatureRawRound()
+
+#### Description
+The methods return the recently known averaged temperature from all active and valid sensors with successful recent conversion either with full precision or rounded value.
+* The temperature is only filter on valid range without any statistical smoothing.
+* In case of entirelly failed conversion at all sensors on the bus the average temperature is `0`.
+* The precision of the averaged temperature value, but not precision of the measurement itself, depends on the measurement resolution (number of used fraction digits) of sensors set by [constructor](#gbj_appthermo_ds).
+
+#### Syntax
+    float getTemperatureRaw()
+    float getTemperatureRawRound(byte precision)
+
+#### Parameters
+* **precision**: Number of decimal places for rounding temperature value.
+  * *Valid values*: positive integers 0 ~ 255
+  * *Default value*: 2
+
+#### Returns
+The averaged current temperature in degrees of Celsius (°C) or rounded to provided decimal places.
+
+#### See also
+[getTemperature()](#getTemperature)
+
+[getTemperatureRound()](#getTemperature)
+
+[Back to interface](#interface)
+
+
 <a id="getTemperature"></a>
 
 ## getTemperature(), getTemperatureRound()
 
 #### Description
 The methods return the recently known averaged and statistically smoothed temperature from all active and valid sensors with successful recent conversion either with full precision or rounded value.
+* In fact, this method statistically smoothes the temperature gained by respective method from [getTemperatureRaw(), getTemperatureRawRound()](#getTemperatureRaw).
 * In case of entirelly failed conversion at all sensors on the bus the average temperature is `0`.
 * The precision of the averaged temperature value, but not precision of the measurement itself, depends on the measurement resolution (number of used fraction digits) of sensors set by [constructor](#gbj_appthermo_ds).
 
@@ -221,7 +254,12 @@ The methods return the recently known averaged and statistically smoothed temper
   * *Default value*: 2
 
 #### Returns
-The averaged temperature in degrees of Celsius (°C) or rounded to provided decimal places.
+The averaged statistically smoothed temperature in degrees of Celsius (°C) or rounded to provided decimal places.
+
+#### See also
+[getTemperatureRaw()](#getTemperatureRaw)
+
+[getTemperatureRawRound()](#getTemperatureRaw)
 
 [Back to interface](#interface)
 
@@ -308,7 +346,7 @@ Number of valid temperature sensors.
 ## getTemperatureAvg(), getTemperatureMin(), getTemperatureMax()
 
 #### Description
-The particular method returns respective statistical value, average, minimum, or maximum of the temperature whithin an observation period.
+The particular method returns respective statistical value, average, minimum, or maximum of the smoothed temperature whithin an observation period.
 - Observation period is the time period since <abbr title='Micro Controller Unit'>MCU</abbr> start or recent reset of statistics by method [reset()](#reset) for which aforementioned statistical values are calculated.
 
 #### Syntax

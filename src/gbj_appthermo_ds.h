@@ -144,12 +144,20 @@ public:
   inline String getIdList() { return idList_; }
   // Return number of active temperature sensors
   inline byte getIds() { return ids_; }
-  // Return recently measured temperature
+  // Return recently measured and smoothed temperature
   inline float getTemperature() { return temperature_; }
-  // Return recently measured temperature rounded to input decimal places
+  // Return recently measured and smoothed temperature rounded to input decimal
+  // places
   inline float getTemperatureRound(byte precision = 2)
   {
     return roundoff(temperature_, precision);
+  }
+  // Return recently only measured temperature
+  inline float getTemperatureRaw() { return temperatureRaw_; }
+  // Return recently only measured temperature rounded to input decimal places
+  inline float getTemperatureRawRound(byte precision = 2)
+  {
+    return roundoff(temperatureRaw_, precision);
   }
   // Return average temperature within the current statistical period
   inline float getTemperatureAvg() { return statAvg_.get(); };
@@ -179,8 +187,10 @@ private:
   byte ids_;
   // List of identifiers of active temperature sensors
   String idList_;
-  // Recently measured temperature in Celsius centigrades
+  // Recently measured and smoothed temperature in Celsius centigrades
   float temperature_;
+  // Recently only measured temperature in Celsius centigrades
+  float temperatureRaw_;
 
   // Measure temperature
   ResultCodes measure();

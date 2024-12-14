@@ -73,13 +73,14 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   // Calculate average temperature
   if (ids_ > 0)
   {
-    temperature_ = smooth_->getValue(temperature_ /= ids_);
+    temperatureRaw_ = temperature_ / ids_;
+    temperature_ = smooth_->getValue(temperatureRaw_);
     statRegister();
     return setLastResult();
   }
   else
   {
-    temperature_ = filter_->getMinimum();
+    temperature_ = temperatureRaw_ = filter_->getMinimum();
     return setLastResult(ResultCodes::ERROR_NODEVICE);
   }
 }
