@@ -123,7 +123,7 @@ public:
     else
     {
       SERIAL_VALUE("Measurement ERROR", getLastResult())
-      if (handlers_.onMeasureFailure)
+      if (handlers_.onMeasureFailure != nullptr)
       {
         handlers_.onMeasureFailure();
       }
