@@ -75,7 +75,13 @@ gbj_appthermo_ds::ResultCodes gbj_appthermo_ds::measure()
   {
     temperatureRaw_ = temperature_ / ids_;
     temperature_ = smooth_->getValue(temperatureRaw_);
-    statRegister();
+
+    // Collect statistics just after NTP boot
+    if (timeBoot_ > 0)
+    {
+      statExtremes_.set(temperature_,
+                        timeBoot_ + gbj_apphelpers::convertMs2Sec(millis()));
+    }
     return setLastResult();
   }
   else
