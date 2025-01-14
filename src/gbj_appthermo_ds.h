@@ -192,10 +192,10 @@ public:
     return statExtremes_.getTimeMin();
   };
 
-  // Return serialized JSON representation of statistical extremes data
+  // Return serialized JSON representation of new statistical extremes data
   inline String getJsonStatisticExtremes()
   {
-    return gbj_appstatistics::exportStatisticExtremes(statExtremes_);
+    return gbj_appstatistics::exportStatisticExtremes(statExtremes_, true);
   }
 
   // Update statistical extremes data from serialized JSON representation
