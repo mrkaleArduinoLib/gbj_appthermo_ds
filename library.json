@@ -15,7 +15,7 @@
   ],
   "dependencies": {
     "mrkaleArduinoLib/gbj_appcore": "*",
-    "mrkaleArduinoLib/gbj_appstatistics": "^1.10.0",
+    "mrkaleArduinoLib/gbj_appstatistics": "^1.15.0",
     "mrkaleArduinoLib/gbj_appfilter": "*",
     "mrkaleArduinoLib/gbj_ds18b20": "*",
     "mrkaleArduinoLib/gbj_exponential": "*",
