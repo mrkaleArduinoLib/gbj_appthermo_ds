@@ -178,14 +178,14 @@ public:
   // Return minimal temperature within the current statistical period
   inline float getTemperatureMin() { return statExtremes_.getMin(); };
 
-  // Return uptime milliseconds of the very first maximal temperature within the
+  // Return epoch seconds of the very first maximal temperature within the
   // current statistical period
   inline unsigned long getTemperatureMaxTime()
   {
     return statExtremes_.getTimeMax();
   };
 
-  // Return uptime milliseconds of the very first minimal temperature within the
+  // Return epoch seconds of the very first minimal temperature within the
   // current statistical period
   inline unsigned long getTemperatureMinTime()
   {
